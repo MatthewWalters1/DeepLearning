@@ -16,13 +16,19 @@ class Neuron:
     #initilize neuron with activation type, number of inputs, learning rate, and possibly with set weights
     def __init__(self,activation, input_num, lr, weights=None):
         self.act = activation
-        #for now, I'm going to assume we have the bias included in the number of inputs, and weights
-        # ^^^ if that's not how we do it, change this code and update this comment ^^^ 
+        #for now, we're going to have self.numinps be the number of inputs, disregarding the bias input, 
+        # which means the length of self.weights must be the length of self.numinps + 1
         self.numinps = input_num
         self.lr = lr
         self.weights = []
-        for i in weights:
-            self.weights.append(i)
+        #for proper use, give one more weight than number of inputs, and if the length of weights is not len(self.numinps) + 1,
+        # then all of the weights will be randomly generated
+        if len(weights) != len(self.numinpss) + 1:
+            for i in len(self.numinps) + 1:
+                self.weights.append(np.random.uniform(0.1, 0.9))
+        else:
+            for i in weights:
+                self.weights.append(i)
         
     #This method returns the activation of the net
     def activate(self,net):
@@ -51,23 +57,20 @@ class Neuron:
     #This method returns the derivative of the activation function with respect to the net   
     def activationderivative(self):
         #derivative of log is output(1-output)
-        #derivative of linear is ?
+        #derivative of linear is the slope of the linear function, which I imagine just returns 1 in this case, 
+        # since activate() just returns it's input
         if self.act == 1:
             return self.output * (1 - self.output)
         else:
-            return
+            return 1
     
     #This method calculates the partial derivative for each weight and returns the delta*w to be used in the previous layer
     def calcpartialderivative(self, wtimesdelta):
         deltaw = 0
         self.partials = []
-        # given wtimesdelta, deltaw is the sum of wtimesdelta * each input
-        # given wtimesdelta, partials is a list of wtimesdelta * each weight
-        for i in range(len(self.weights)):
-            ding = wtimesdelta * self.weights[i] * self.inps[i]
-            deltaw += ding
-            self.partials.append(ding * activationderivative() * self.weights[i])
-        return deltaw
+        print("This function is hard to write")
+            
+
     
     #Simply update the weights using the partial derivatives and the learning rate
     def updateweight(self):
