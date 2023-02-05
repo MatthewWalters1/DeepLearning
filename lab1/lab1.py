@@ -23,8 +23,8 @@ class Neuron:
         self.weights = []
         #for proper use, give one more weight than number of inputs, and if the length of weights is not len(self.numinps) + 1,
         # then all of the weights will be randomly generated
-        if len(weights) != len(self.numinpss) + 1:
-            for i in len(self.numinps) + 1:
+        if len(weights) != len(self.numinps) + 1:
+            for i in range(self.numinps) + 1:
                 self.weights.append(np.random.uniform(0.1, 0.9))
         else:
             for i in weights:
@@ -68,8 +68,6 @@ class Neuron:
     def calcpartialderivative(self, wtimesdelta):
         self.delta = 0
         print("This function is hard to write")
-            
-
     
     #Simply update the weights using the partial derivatives and the learning rate
     def updateweight(self):
@@ -81,28 +79,51 @@ class Neuron:
             self.weights.append(newweights[i])
 
         
-#A fully connected layer        
+#A fully connected layer 
+#for Matthew       
 class FullyConnected:
     #initialize with the number of neurons in the layer, their activation, the input size, 
     # the leraning rate and a 2d matrix of weights (or else initilize randomly)
     def __init__(self,numOfNeurons, activation, input_num, lr, weights=None):
-        print('constructor') 
+        self.numN = numOfNeurons
+        self.activation = activation
+        self.numinps = input_num
+        self.lr = lr
+        self.neurons = []
+        self.weights = []
+        if len(weights) != len(self.numinps) + 1:
+            for i in range(self.numN):
+                w = []
+                for j in range(self.numinps) + 1:
+                    w.append(np.random.uniform(0.1, 0.9))
+                self.weights.append(w)
+        else:
+            for i in weights:
+                w = []
+                for j in weights[i]:
+                    w.append(j)
+                self.weights.append(w)
+        for i in range(self.numN):
+            x = Neuron(self.activation, self.numinps, self.lr, self.weights[i])
+            self.neurons.append(x)
         
-        
-    #calcualte the output of all the neurons in the layer and return a vector with those values 
+    #calculate the output of all the neurons in the layer and return a vector with those values 
     # (go through the neurons and call the calcualte() method)      
-    def calculate(self, input):
-        print('calculate') 
+    def calculate(self, inputs):
+        self.outputs = []
+        for i in self.neurons:
+            self.outputs.append(i.calculate(inputs))
+        return self.outputs
         
-            
     #given the next layer's w*delta, should run through the neurons calling calcpartialderivative() 
-    # for each (with the correct value), sum up its ownw*delta, and then update the wieghts (using the updateweight() method). 
+    # for each (with the correct value), sum up its own w*delta, and then update the weights (using the updateweight() method). 
     # I should return the sum of w*delta.          
     def calcwdeltas(self, wtimesdelta):
         print('calcwdeltas') 
            
         
-#An entire neural network        
+#An entire neural network 
+#for Steven       
 class NeuralNetwork:
     #initialize with the number of layers, number of neurons in each layer (vector), input size, activation (for each layer), 
     # the loss function, the learning rate and a 3d matrix of weights weights (or else initialize randomly)
