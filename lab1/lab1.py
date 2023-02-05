@@ -41,16 +41,16 @@ class Neuron:
             raise Exception("Activation Function not Supported")
         
     #Calculate the output of the neuron should save the input and output for back-propagation.   
-    def calculate(self,input):
-        self.input = input
+    def calculate(self,inputs):
+        self.input = inputs
         x = 0
         #   here, I put range(len(input)) + 1, so the bias would be included, 
         #       and when it gets to the bias, the input is always 1, hence the if statement
-        for i in range(len(input)) + 1:
-            if i > range(len(input)):
+        for i in self.numinps + 1:
+            if i > self.numinps:
                 x += 1*self.weights[i]
             else:
-                x += input[i]*self.weights[i]
+                x += self.input[i]*self.weights[i]
         self.output = activate(x)
         return self.output
 
@@ -66,8 +66,7 @@ class Neuron:
     
     #This method calculates the partial derivative for each weight and returns the delta*w to be used in the previous layer
     def calcpartialderivative(self, wtimesdelta):
-        deltaw = 0
-        self.partials = []
+        self.delta = 0
         print("This function is hard to write")
             
 
@@ -76,7 +75,7 @@ class Neuron:
     def updateweight(self):
         newweights = []
         for i in range(len(self.weights)):
-            newweights.append(self.weights[i] - self.partials[i]*self.lr)
+            newweights.append(self.weights[i] - self.delta*self.input[i]*self.lr)
         self.weights = []
         for i in range(len(newweights)):
             self.weights.append(newweights[i])
