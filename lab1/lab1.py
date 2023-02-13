@@ -21,14 +21,10 @@ class Neuron:
         self.numinps = input_num
         self.lr = lr
         self.weights = []
-        #for proper use, give one more weight than number of inputs, and if the length of weights is not len(self.numinps) + 1,
-        # then all of the weights will be randomly generated
-        if len(weights) != len(self.numinps) + 1:
-            for i in range(self.numinps) + 1:
-                self.weights.append(np.random.uniform(0.1, 0.9))
-        else:
-            for i in weights:
-                self.weights.append(i)
+        #since I wrote the FullyConnectedLayer to randomly generate weights if not given, 
+        # the neuron will be given weights, random or not
+        for i in weights:
+            self.weights.append(i)
         
     #This method returns the activation of the net
     def activate(self,net):
@@ -91,16 +87,19 @@ class FullyConnected:
         self.lr = lr
         self.neurons = []
         self.weights = []
-        if len(weights) != len(self.numinps) + 1:
+        # the length of each list of weights must be the number of inputs + 1 or it won't use them
+        # it also won't accept the weights if there aren't the right amount of lists of weights
+        if len(weights) != self.numN or len(weights[0]) != self.numinps + 1:
+            print("random weights")
             for i in range(self.numN):
                 w = []
-                for j in range(self.numinps) + 1:
+                for j in range(self.numinps + 1):
                     w.append(np.random.uniform(0.1, 0.9))
                 self.weights.append(w)
         else:
             for i in weights:
                 w = []
-                for j in weights[i]:
+                for j in i:
                     w.append(j)
                 self.weights.append(w)
         for i in range(self.numN):
