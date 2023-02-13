@@ -133,19 +133,24 @@ class NeuralNetwork:
         self.activation = activation.copy()
         self.loss = loss
         self.lr = lr
+        self.layers = []
         isize = self.numinps
         if len(weights) == self.numL:
             for i in range(len(self.numL)):
                 x = FullyConnected(self.numN[i], self.activation[i], isize, self.lr, weights[i])
                 isize = self.numN[i]
+                self.layers.append(x)
         else:
             for i in range(len(self.numL)):
                 x = FullyConnected(self.numN[i], self.activation[i], isize, self.lr)
                 isize = self.numN
+                self.layers.append(x)
     
     #Given an input, calculate the output (using the layers calculate() method)
-    def calculate(self,input):
-        print('constructor')
+    def calculate(self,inputs):
+        self.input = inputs
+        
+
         
     #Given a predicted output and ground truth output simply return the loss (depending on the loss function)
     def calculateloss(self,yp,y):
