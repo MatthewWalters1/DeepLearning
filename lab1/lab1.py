@@ -69,7 +69,10 @@ class Neuron:
     def updateweight(self):
         newweights = []
         for i in range(len(self.weights)):
-            newweights.append(self.weights[i] - self.delta*self.input[i]*self.lr)
+            if i > self.numinps:
+                newweights.append(self.weights[i] - self.delta*1*self.lr)
+            else:
+                newweights.append(self.weights[i] - self.delta*self.input[i]*self.lr)
         self.weights = []
         for i in range(len(newweights)):
             self.weights.append(newweights[i])
@@ -152,7 +155,7 @@ class NeuralNetwork:
         output = inputs
         for i in self.layers:
             output = i.calculate(output)
-        self.output = output
+        return output
         
     #Given a predicted output and ground truth output simply return the loss (depending on the loss function)
     def calculateloss(self,yp,y):
@@ -171,12 +174,29 @@ class NeuralNetwork:
     
     #Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)        
     def lossderiv(self,yp,y):
-        print('lossderiv')
+        loss = calculateloss(yp, y)
+        #find derivative of said loss
+        if self.loss == 0:
+            #derivative of sum squared error
+            ld = 0
+            pass
+        elif self.loss == 1:
+            #derivative of binary cross entropy
+            ld = 0
+            pass
+        else:
+            raise Exception("Loss Function Not Supported")
+        return ld
     
     #Given a single input and desired output preform one step of backpropagation 
     # (including a forward pass, getting the derivative of the loss, and then calling calcwdeltas for layers with the right values)
     def train(self,x,y):
         print('train')
+        #PSEUDOCODE
+        # output = calculate(x)
+        # ld = lossderiv(output, y)
+        # for i in reversed(self.layers):
+        #   i.calcwdeltas
 
 if __name__=="__main__":
     if (len(sys.argv)<2):
