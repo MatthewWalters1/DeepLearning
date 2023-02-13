@@ -158,14 +158,16 @@ class NeuralNetwork:
     def calculateloss(self,yp,y):
         # self.loss == 0: sum of squared errors
         # self.loss == 1: binary cross entropy
+        #the binary cross entropy makes the assumption you only have 1 output, sum squared errors assumes you have a list of outputs
         if self.loss == 0:
-            sum = 0
+            loss = 0
             for i in range(len(yp)):
-                sum += ((yp[i] - y[i]) * (yp[i] - y[i]))
+                loss += ((yp[i] - y[i]) * (yp[i] - y[i]))
         elif self.loss == 1:
-            pass
+            loss = -(y * np.log(yp)) + ((1 - y) * np.log(1 - yp))
         else:
             raise Exception("Loss Function Not Supported")
+        return loss
     
     #Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)        
     def lossderiv(self,yp,y):
