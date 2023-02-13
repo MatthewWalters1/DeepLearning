@@ -149,12 +149,23 @@ class NeuralNetwork:
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,inputs):
         self.input = inputs
-        
-
+        output = inputs
+        for i in self.layers:
+            output = i.calculate(output)
+        self.output = output
         
     #Given a predicted output and ground truth output simply return the loss (depending on the loss function)
     def calculateloss(self,yp,y):
-        print('calculate')
+        # self.loss == 0: sum of squared errors
+        # self.loss == 1: binary cross entropy
+        if self.loss == 0:
+            sum = 0
+            for i in range(len(yp)):
+                sum += ((yp[i] - y[i]) * (yp[i] - y[i]))
+        elif self.loss == 1:
+            pass
+        else:
+            raise Exception("Loss Function Not Supported")
     
     #Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)        
     def lossderiv(self,yp,y):
