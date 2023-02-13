@@ -207,9 +207,66 @@ if __name__=="__main__":
         w=np.array([[[.15,.2,.35],[.25,.3,.35]],[[.4,.45,.6],[.5,.55,.6]]])
         x=np.array([0.05,0.1])
         y=np.array([0.01,0.99])
+        network = NeuralNetwork(2, [2,2], 2, [1,1], 1, .3, w)
+        network.train(x, y)
+        print(network.calculate(x))
         
     elif(sys.argv[1]=='and'):
-        print('learn and')
-        
+        print('learn AND')
+        x = np.array([[0,0], [0,1], [1,0], [1,1]])
+        y = np.array([0], [0], [0], [1])
+        # a single perceptron (linear activation, binary cross entropy loss, .3 learning rate, random weights)
+        network = NeuralNetwork(1, [1], 2, [0,0], 1, .3)
+        a = [0,0,0,0]
+        print("Starting Training")
+        while (a != [1,1,1,1]):
+            for i in range(len(x)):
+                con = network.calculate(x[i])
+                network.train(x[i], y[i])
+                # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
+                if con == network.calculate(x[i]):
+                    a[i] = 1
+        print("converged")
+        print("0,0:", network.calculate([0,0]))
+        print("0,1:", network.calculate([0,1]))
+        print("1,0:", network.calculate([1,0]))
+        print("1,1:", network.calculate([1,1]))
+
     elif(sys.argv[1]=='xor'):
-        print('learn xor')
+        print('learn XOR')
+        x = np.array([[0,0], [0,1], [1,0], [1,1]])
+        y = np.array([0], [1], [1], [0])
+        # 1 perceptron (logistic activation, binary cross entropy loss, .3 learning rate, random weights)
+        network = NeuralNetwork(1, [1], 2, [1,1], 1, .3)
+        a = [0,0,0,0]
+        print("Starting Training on 1 perceptron")
+        while (a != [1,1,1,1]):
+            for i in range(len(x)):
+                con = network.calculate(x[i])
+                network.train(x[i], y[i])
+                # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
+                if con == network.calculate(x[i]):
+                    a[i] = 1
+        print("converged")
+        print("0,0:", network.calculate([0,0]))
+        print("0,1:", network.calculate([0,1]))
+        print("1,0:", network.calculate([1,0]))
+        print("1,1:", network.calculate([1,1]))
+
+        # 1 output perceptron plus a hidden layer, also one perceptron 
+        # (logistic activation, binary cross entropy loss, .3 learning rate, random weights)
+        network = NeuralNetwork(2, [1,1], 2, [1,1], 1, .3)
+        print("Starting Training with a hidden layer")
+        while (a != [1,1,1,1]):
+            for i in range(len(x)):
+                con = network.calculate(x[i])
+                network.train(x[i], y[i])
+                # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
+                if con == network.calculate(x[i]):
+                    a[i] = 1
+        print("converged")
+        print("0,0:", network.calculate([0,0]))
+        print("0,1:", network.calculate([0,1]))
+        print("1,0:", network.calculate([1,0]))
+        print("1,1:", network.calculate([1,1]))
+
