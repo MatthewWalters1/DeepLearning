@@ -42,12 +42,12 @@ class Neuron:
         x = 0
         #   here, I put range(len(input)) + 1, so the bias would be included, 
         #       and when it gets to the bias, the input is always 1, hence the if statement
-        for i in self.numinps + 1:
-            if i > self.numinps:
+        for i in range(self.numinps + 1):
+            if i >= self.numinps:
                 x += 1*self.weights[i]
             else:
                 x += self.input[i]*self.weights[i]
-        self.output = activate(x)
+        self.output = self.activate(x)
         return self.output
 
     #This method returns the derivative of the activation function with respect to the net   
@@ -124,8 +124,21 @@ class FullyConnected:
     # for each (with the correct value), sum up its own w*delta, and then update the weights (using the updateweight() method). 
     # I should return the sum of w*delta.          
     def calcwdeltas(self, wtimesdelta):
-        print('calcwdeltas') 
-           
+        self.wdeltas = []
+        for i in range(self.numN):
+            x = self.neurons[i].calcpartialderivative(wtimesdelta[i])
+            self.wdeltas.append(x)
+        self.wtimesdeltas = []
+        for i in range(self.numN):
+            y = 0
+            for j in range(len(self.weights)):
+                y += self.wdeltas[j][i]
+            self.wtimesdeltas.append(y)
+        # wtimesdelta done
+        # update weights
+        for i in self.neurons:
+            i.updateweight()
+        return self.wtimesdeltas           
         
 #An entire neural network 
 #for Steven       
@@ -142,12 +155,12 @@ class NeuralNetwork:
         self.layers = []
         isize = self.numinps
         if len(weights) == self.numL:
-            for i in range(len(self.numL)):
+            for i in range(self.numL):
                 x = FullyConnected(self.numN[i], self.activation[i], isize, self.lr, weights[i])
                 isize = self.numN[i]
                 self.layers.append(x)
         else:
-            for i in range(len(self.numL)):
+            for i in range(self.numL):
                 x = FullyConnected(self.numN[i], self.activation[i], isize, self.lr)
                 isize = self.numN
                 self.layers.append(x)
@@ -168,7 +181,7 @@ class NeuralNetwork:
         if self.loss == 0:
             loss = 0
             for i in range(len(yp)):
-                loss += ((yp[i] - y[i]) * (yp[i] - y[i]))
+                loss += ((yp[i] - y[i])**2)
         elif self.loss == 1:
             loss = -(y * np.log(yp)) + ((1 - y) * np.log(1 - yp))
         else:
@@ -177,16 +190,14 @@ class NeuralNetwork:
     
     #Given a predicted output and ground truth output simply return the derivative of the loss (depending on the loss function)        
     def lossderiv(self,yp,y):
-        loss = calculateloss(yp, y)
-        #find derivative of said loss
         if self.loss == 0:
             #derivative of sum squared error
             ld = 0
-            pass
+            for i in range(len(yp)):
+                ld += 2(yp[i] - y[i])
         elif self.loss == 1:
             #derivative of binary cross entropy
-            ld = 0
-            pass
+            ld = -(y/yp) + ((1-y)/(1-yp))
         else:
             raise Exception("Loss Function Not Supported")
         return ld
@@ -196,10 +207,10 @@ class NeuralNetwork:
     def train(self,x,y):
         print('train')
         #PSEUDOCODE
-        # output = calculate(x)
-        # ld = lossderiv(output, y)
-        # for i in reversed(self.layers):
-        #   i.calcwdeltas
+        output = self.calculate(x)
+        ld = self.lossderiv(output, y)
+        #for i in reversed(self.layers):
+        #   i.calcwdeltas()
 
 if __name__=="__main__":
     if (len(sys.argv)<2):
@@ -211,6 +222,7 @@ if __name__=="__main__":
         x=np.array([0.05,0.1])
         y=np.array([0.01,0.99])
         network = NeuralNetwork(2, [2,2], 2, [1,1], 1, .3, w)
+        print(network.calculate(x))
         network.train(x, y)
         print(network.calculate(x))
         
