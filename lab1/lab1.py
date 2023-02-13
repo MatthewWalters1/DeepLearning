@@ -227,10 +227,8 @@ if __name__=="__main__":
                 if con == network.calculate(x[i]):
                     a[i] = 1
         print("converged")
-        print("0,0:", network.calculate([0,0]))
-        print("0,1:", network.calculate([0,1]))
-        print("1,0:", network.calculate([1,0]))
-        print("1,1:", network.calculate([1,1]))
+        for i in x:
+            print(i,":", network.calculate(i))
 
     elif(sys.argv[1]=='xor'):
         print('learn XOR')
@@ -248,10 +246,8 @@ if __name__=="__main__":
                 if con == network.calculate(x[i]):
                     a[i] = 1
         print("converged")
-        print("0,0:", network.calculate([0,0]))
-        print("0,1:", network.calculate([0,1]))
-        print("1,0:", network.calculate([1,0]))
-        print("1,1:", network.calculate([1,1]))
+        for i in x:
+            print(i,":", network.calculate(i))
 
         # 1 output perceptron plus a hidden layer, also one perceptron 
         # (logistic activation, binary cross entropy loss, .3 learning rate, random weights)
@@ -265,8 +261,6 @@ if __name__=="__main__":
                 if con == network.calculate(x[i]):
                     a[i] = 1
         print("converged")
-        print("0,0:", network.calculate([0,0]))
-        print("0,1:", network.calculate([0,1]))
-        print("1,0:", network.calculate([1,0]))
-        print("1,1:", network.calculate([1,1]))
+        for i in x:
+            print(i,":", network.calculate(i))
 
