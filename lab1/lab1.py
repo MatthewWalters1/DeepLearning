@@ -88,7 +88,7 @@ class FullyConnected:
         self.neurons = []
         self.weights = []
         # the length of each list of weights must be the number of inputs + 1 or it won't use them
-        # it also won't accept the weights if there aren't the right amount of lists of weights
+        # it also won't accept the weights if there isn't a of list of weights for each neuron, no more no less
         if len(weights) != self.numN or len(weights[0]) != self.numinps + 1:
             print("random weights")
             for i in range(self.numN):
@@ -127,7 +127,21 @@ class NeuralNetwork:
     #initialize with the number of layers, number of neurons in each layer (vector), input size, activation (for each layer), 
     # the loss function, the learning rate and a 3d matrix of weights weights (or else initialize randomly)
     def __init__(self,numOfLayers,numOfNeurons, inputSize, activation, loss, lr, weights=None):
-        print('constructor') 
+        self.numL = numOfLayers
+        self.numN = numOfNeurons.copy()
+        self.numinps = inputSize
+        self.activation = activation.copy()
+        self.loss = loss
+        self.lr = lr
+        isize = self.numinps
+        if len(weights) == self.numL:
+            for i in range(len(self.numL)):
+                x = FullyConnected(self.numN[i], self.activation[i], isize, self.lr, weights[i])
+                isize = self.numN[i]
+        else:
+            for i in range(len(self.numL)):
+                x = FullyConnected(self.numN[i], self.activation[i], isize, self.lr)
+                isize = self.numN
     
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,input):
