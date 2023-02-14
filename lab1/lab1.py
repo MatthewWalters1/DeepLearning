@@ -2,6 +2,9 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 """
+Matthew Walters - Steven Koprowicz
+2/13/23
+
 For this entire file there are a few constants:
 activation:
 0 - linear
