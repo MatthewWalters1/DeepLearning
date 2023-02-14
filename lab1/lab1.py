@@ -72,7 +72,7 @@ class Neuron:
     def updateweight(self):
         newweights = []
         for i in range(len(self.weights)):
-            if i > self.numinps:
+            if i >= self.numinps:
                 newweights.append(self.weights[i] - self.delta*1*self.lr)
             else:
                 newweights.append(self.weights[i] - self.delta*self.input[i]*self.lr)
@@ -194,7 +194,7 @@ class NeuralNetwork:
             #derivative of sum squared error
             ld = 0
             for i in range(len(yp)):
-                ld += 2(yp[i] - y[i])
+                ld += 2*(yp[i] - y[i])
         elif self.loss == 1:
             #derivative of binary cross entropy
             ld = -(y/yp) + ((1-y)/(1-yp))
@@ -209,8 +209,12 @@ class NeuralNetwork:
         #PSEUDOCODE
         output = self.calculate(x)
         ld = self.lossderiv(output, y)
-        #for i in reversed(self.layers):
-        #   i.calcwdeltas()
+        lds = []
+        for i in range(self.layers[self.numL - 1].numN):
+            lds.append(ld)
+        for i in reversed(self.layers):
+           lds = i.calcwdeltas(lds)
+
 
 if __name__=="__main__":
     if (len(sys.argv)<2):
@@ -221,7 +225,7 @@ if __name__=="__main__":
         w=np.array([[[.15,.2,.35],[.25,.3,.35]],[[.4,.45,.6],[.5,.55,.6]]])
         x=np.array([0.05,0.1])
         y=np.array([0.01,0.99])
-        network = NeuralNetwork(2, [2,2], 2, [1,1], 1, .3, w)
+        network = NeuralNetwork(2, [2,2], 2, [1,1], 0, .3, w)
         print(network.calculate(x))
         network.train(x, y)
         print(network.calculate(x))
