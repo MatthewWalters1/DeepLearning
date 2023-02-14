@@ -332,4 +332,3 @@ if __name__=="__main__":
         plt.ylabel("Loss")
         plt.title("XOR with a hidden layer: Loss over Time")
         plt.show()
-
