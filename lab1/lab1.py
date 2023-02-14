@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+import matplotlib.pyplot as plt
 """
 For this entire file there are a few constants:
 activation:
@@ -96,7 +97,7 @@ class FullyConnected:
         # the length of each list of weights must be the number of inputs + 1 or it won't use them
         # it also won't accept the weights if there isn't a of list of weights for each neuron, no more no less
         if weights is None or len(weights) != self.numN or len(weights[0]) != self.numinps + 1:
-            print("random weights")
+            # print("random weights")
             for i in range(self.numN):
                 w = []
                 for j in range(self.numinps + 1):
@@ -125,13 +126,13 @@ class FullyConnected:
     # I should return the sum of w*delta.          
     def calcwdeltas(self, wtimesdelta):
         self.wdeltas = []
-        for i in range(self.numN):
+        for i in range(len(self.neurons)):
             x = self.neurons[i].calcpartialderivative(wtimesdelta[i])
             self.wdeltas.append(x)
         self.wtimesdeltas = []
-        for i in range(self.numN):
+        for i in range(len(self.weights[i])):
             y = 0
-            for j in range(len(self.weights)):
+            for j in range(len(self.wdeltas)):
                 y += self.wdeltas[j][i]
             self.wtimesdeltas.append(y)
         # wtimesdelta done
@@ -221,18 +222,26 @@ if __name__=="__main__":
         x=np.array([0.05,0.1])
         y=np.array([0.01,0.99])
         network = NeuralNetwork(2, [2,2], 2, [1,1], 0, .5, w)
-        for i in range(10000):
+        print(network.calculate(x))
+        # points = []
+        for i in range(1000):
+            # point = network.calculate(x)
+            # points.append(network.calculateloss(point, y))
             network.train(x, y)
-            print(network.calculate(x))
+        print(network.calculate(x))
+        # plt.plot(points)
+        # plt.xlabel("Iterations")
+        # plt.ylabel("Loss")
+        # plt.title("Loss over Time")
+        # plt.show()
         
     elif(sys.argv[1]=='and'):
         print('learn AND')
         x = np.array([[0,0], [0,1], [1,0], [1,1]])
         y = np.array([[0],[0],[0],[1]])
         a = [0,0,0,0]
-        # a single perceptron (linear activation, binary cross entropy loss, .3 learning rate, random weights)
+        # a single perceptron (logistic activation, binary cross entropy loss, .5 learning rate, random weights)
         network = NeuralNetwork(1, [1], 2, [1], 1, .5)
-        print("Starting Training with a hidden layer")
         count = 0
         while (a != [1,1,1,1]):
             for i in range(len(x)):
@@ -254,21 +263,21 @@ if __name__=="__main__":
         print('learn XOR')
         x = np.array([[0,0], [0,1], [1,0], [1,1]])
         y = np.array([[0], [1], [1], [0]])
-        # 1 perceptron (logistic activation, binary cross entropy loss, .3 learning rate, random weights)
+        # 1 perceptron (logistic activation, binary cross entropy loss, .5 learning rate, random weights)
         network = NeuralNetwork(1, [1], 2, [1], 1, .5)
         a = [0,0,0,0]
         print("Starting Training on 1 perceptron")
-        #while (a != [1,1,1,1]):
         for i in x:
             print(i,":", network.calculate(i))
         count = 0
-        for j in range(1000):
+        while (a != [1,1,1,1]):
             for i in range(len(x)):
                 con = network.calculate(x[i])[0]
                 network.train(x[i], y[i])
                 # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
                 if abs(con - network.calculate(x[i])[0]) < 10**(-2):
                     a[i] = 1
+            count += 1
             if count == 10000:
                 print("does not converge")
                 break
@@ -277,9 +286,12 @@ if __name__=="__main__":
         for i in x:
             print(i,":", network.calculate(i))
         # 1 output perceptron plus a hidden layer, also one perceptron 
-        # (logistic activation, binary cross entropy loss, .3 learning rate, random weights)
-        network = NeuralNetwork(2, [1,1], 2, [1,1], 1, .5)
+        # (logistic activation, binary cross entropy loss, .5 learning rate, random weights)
+        # with less than 4 neurons in the hidden layer, it won't always converge
+        network = NeuralNetwork(2, [4,1], 2, [1,1], 1, .5)
         print("Starting Training with a hidden layer")
+        for i in x:
+            print(i,":", network.calculate(i))
         count = 0
         while (a != [1,1,1,1]):
             for i in range(len(x)):
