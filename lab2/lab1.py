@@ -246,11 +246,11 @@ if __name__=="__main__":
         # a single perceptron (logistic activation, binary cross entropy loss, .5 learning rate, random weights)
         network = NeuralNetwork(1, [1], 2, [1], 1, .5)
         count = 0
-        points = []
+        # points = []
         while (a != [1,1,1,1]):
             for i in range(len(x)):
                 con = network.calculate(x[i])[0]
-                points.append(network.calculateloss(con,y[i]))
+                # points.append(network.calculateloss(con,y[i]))
                 network.train(x[i], y[i])
                 # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
                 if abs(con - network.calculate(x[i])[0]) < 10**(-2):
@@ -263,11 +263,11 @@ if __name__=="__main__":
                 print("converged")
         for i in x:
             print(i,":", network.calculate(i))
-        plt.plot(points)
-        plt.xlabel("Iterations")
-        plt.ylabel("Loss")
-        plt.title("AND: Loss over Time")
-        plt.show()
+        # plt.plot(points)
+        # plt.xlabel("Iterations")
+        # plt.ylabel("Loss")
+        # plt.title("AND: Loss over Time")
+        # plt.show()
 
     elif(sys.argv[1]=='xor'):
         print('learn XOR')
@@ -280,11 +280,11 @@ if __name__=="__main__":
         for i in x:
             print(i,":", network.calculate(i))
         count = 0
-        points = []
+        # points = []
         while (a != [1,1,1,1]):
             for i in range(len(x)):
                 con = network.calculate(x[i])[0]
-                points.append(network.calculateloss(con, y[i]))
+                # points.append(network.calculateloss(con, y[i]))
                 network.train(x[i], y[i])
                 # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
                 if abs(con - network.calculate(x[i])[0]) < 10**(-2):
@@ -295,11 +295,11 @@ if __name__=="__main__":
                 break
             if a == [1,1,1,1]:
                 print("converged")
-        plt.plot(points)
-        plt.xlabel("Iterations")
-        plt.ylabel("Loss")
-        plt.title("XOR with 1 Perceptron: Loss over Time")
-        plt.show()
+        # plt.plot(points)
+        # plt.xlabel("Iterations")
+        # plt.ylabel("Loss")
+        # plt.title("XOR with 1 Perceptron: Loss over Time")
+        # plt.show()
         for i in x:
             print(i,":", network.calculate(i))
         # 1 output perceptron plus a hidden layer, also one perceptron 
@@ -310,11 +310,11 @@ if __name__=="__main__":
         for i in x:
             print(i,":", network.calculate(i))
         count = 0
-        points = []
+        # points = []
         while (a != [1,1,1,1]):
             for i in range(len(x)):
                 con = network.calculate(x[i])[0]
-                points.append(network.calculateloss(con, y[i]))
+                # points.append(network.calculateloss(con, y[i]))
                 network.train(x[i], y[i])
                 # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
                 if abs(con - network.calculate(x[i])[0]) < 10**(-2):
@@ -327,8 +327,8 @@ if __name__=="__main__":
                 print("converged")
         for i in x:
             print(i,":", network.calculate(i))
-        plt.plot(points)
-        plt.xlabel("Iterations")
-        plt.ylabel("Loss")
-        plt.title("XOR with a hidden layer: Loss over Time")
-        plt.show()
+        # plt.plot(points)
+        # plt.xlabel("Iterations")
+        # plt.ylabel("Loss")
+        # plt.title("XOR with a hidden layer: Loss over Time")
+        # plt.show()
