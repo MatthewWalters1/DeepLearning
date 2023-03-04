@@ -151,6 +151,7 @@ class NeuralNetwork:
         self.numL = 0
         self.numN = []
         self.numinps = inputSize
+        self.numouts = inputSize
         self.activation = []
         self.loss = loss
         self.lr = lr
@@ -178,6 +179,17 @@ class NeuralNetwork:
                 isize = self.numN[i]
                 self.layers.append(x)
     
+    #addLayer will use self.numouts as it's inputsize and reset self.numouts to be the output size of the new layer
+    def addLayer(self, numOfNeurons, activation, weights=None):
+        act = activation
+        numins = self.numouts
+        self.numouts = numOfNeurons
+        if weights is not None and len(weights) == numins + 1:
+            layer = FullyConnected(numofNeurons, act, numins, self.lr, weights)
+            self.layers.append(layer)
+        else:
+            layer = FullyConnected(numOfNeurons, act, numins, self.lr)
+
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,inputs):
         self.input = inputs
