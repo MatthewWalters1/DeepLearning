@@ -184,11 +184,14 @@ class NeuralNetwork:
         act = activation
         numins = self.numouts
         self.numouts = numOfNeurons
+        self.numN.append(numOfNeurons)
+        self.numL += 1
         if weights is not None and len(weights) == self.numouts:
             layer = FullyConnected(numOfNeurons, act, numins, self.lr, weights)
             self.layers.append(layer)
         else:
             layer = FullyConnected(numOfNeurons, act, numins, self.lr)
+            self.layers.append(layer)
 
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,inputs):
@@ -206,7 +209,7 @@ class NeuralNetwork:
         if self.loss == 0:
             loss = 0
             for i in range(len(yp)):
-                loss += ((yp[i] - y[i])**2)
+                loss += 1/2*((yp[i] - y[i])**2)
         elif self.loss == 1:
             loss = -(y * np.log(yp)) + ((1 - y) * np.log(1 - yp))
         else:
@@ -269,6 +272,8 @@ if __name__=="__main__":
         network = NeuralNetwork(1, [1], 2, [1], 1, .5)
         count = 0
         # points = []
+        for i in x:
+            print(i,":", network.calculate(i))
         while (a != [1,1,1,1]):
             for i in range(len(x)):
                 con = network.calculate(x[i])[0]
@@ -285,11 +290,33 @@ if __name__=="__main__":
                 print("converged")
         for i in x:
             print(i,":", network.calculate(i))
-        # plt.plot(points)
-        # plt.xlabel("Iterations")
-        # plt.ylabel("Loss")
-        # plt.title("AND: Loss over Time")
-        # plt.show()
+    elif(sys.argv[1]=='andl'):
+        print('learnAND with addlayer')
+        x = np.array([[0,0], [0,1], [1,0], [1,1]])
+        y = np.array([[0], [0], [0], [1]])
+        a = [0,0,0,0]
+        network = NeuralNetwork(2, 1, .5)
+        network.addLayer(1, 1)
+        count = 0
+        for i in x:
+            print(i,":",network.calculate(i))
+        while (a != [1,1,1,1]):
+            for i in range(len(x)):
+                con = network.calculate(x[i])[0]
+                # points.append(network.calculateloss(con,y[i]))
+                network.train(x[i], y[i])
+                # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
+                if abs(con - network.calculate(x[i])[0]) < 10**(-2):
+                    a[i] = 1
+            count += 1
+            if count == 10000:
+                print("does not converge")
+                break
+            elif a == [1,1,1,1]:
+                print("converged")
+        for i in x:
+            print(i,":", network.calculate(i))
+            
 
     elif(sys.argv[1]=='xor'):
         print('learn XOR')
