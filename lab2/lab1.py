@@ -159,33 +159,33 @@ class NeuralNetwork:
         self.layers = []
     #initialize with the number of layers, number of neurons in each layer (vector), input size, activation (for each layer), 
     # the loss function, the learning rate and a 3d matrix of weights weights (or else initialize randomly)
-    def __init__(self,numOfLayers,numOfNeurons, inputSize, activation, loss, lr, weights=None):
-        self.numL = numOfLayers
-        self.numN = numOfNeurons.copy()
-        self.numinps = inputSize
-        self.activation = activation.copy()
-        self.loss = loss
-        self.lr = lr
-        self.layers = []
-        isize = self.numinps
-        if weights is not None and len(weights) == self.numL:
-            for i in range(self.numL):
-                x = FullyConnected(self.numN[i], self.activation[i], isize, self.lr, weights[i])
-                isize = self.numN[i]
-                self.layers.append(x)
-        else:
-            for i in range(self.numL):
-                x = FullyConnected(self.numN[i], self.activation[i], isize, self.lr)
-                isize = self.numN[i]
-                self.layers.append(x)
+    # def __init__(self,numOfLayers,numOfNeurons, inputSize, activation, loss, lr, weights=None):
+    #     self.numL = numOfLayers
+    #     self.numN = numOfNeurons.copy()
+    #     self.numinps = inputSize
+    #     self.activation = activation.copy()
+    #     self.loss = loss
+    #     self.lr = lr
+    #     self.layers = []
+    #     isize = self.numinps
+    #     if weights is not None and len(weights) == self.numL:
+    #         for i in range(self.numL):
+    #             x = FullyConnected(self.numN[i], self.activation[i], isize, self.lr, weights[i])
+    #             isize = self.numN[i]
+    #             self.layers.append(x)
+    #     else:
+    #         for i in range(self.numL):
+    #             x = FullyConnected(self.numN[i], self.activation[i], isize, self.lr)
+    #             isize = self.numN[i]
+    #             self.layers.append(x)
     
     #addLayer will use self.numouts as it's inputsize and reset self.numouts to be the output size of the new layer
     def addLayer(self, numOfNeurons, activation, weights=None):
         act = activation
         numins = self.numouts
         self.numouts = numOfNeurons
-        if weights is not None and len(weights) == numins + 1:
-            layer = FullyConnected(numofNeurons, act, numins, self.lr, weights)
+        if weights is not None and len(weights) == self.numouts:
+            layer = FullyConnected(numOfNeurons, act, numins, self.lr, weights)
             self.layers.append(layer)
         else:
             layer = FullyConnected(numOfNeurons, act, numins, self.lr)
@@ -238,7 +238,17 @@ class NeuralNetwork:
 
 if __name__=="__main__":
     if (len(sys.argv)<2):
-        print('a good place to test different parts of your code')
+        print('making the example from class but with addLayer')
+        w1 = np.array([[.15,.2,.35],[.25,.3,.35]])
+        w2 = np.array([[.4,.45,.6],[.5,.55,.6]])
+        x = np.array([0.05,0.1])
+        y = np.array([0.01,0.99])
+        network = NeuralNetwork(2, 0, .5)
+        network.addLayer(2, 1, w1)
+        network.addLayer(2, 1, w2)
+        print(network.calculate(x))
+        network.train(x,y)
+        print(network.calculate(x))
         
     elif (sys.argv[1]=='example'):
         print('run example from class (single step)')
@@ -247,17 +257,8 @@ if __name__=="__main__":
         y=np.array([0.01,0.99])
         network = NeuralNetwork(2, [2,2], 2, [1,1], 0, .5, w)
         print(network.calculate(x))
-        # points = []
-        for i in range(1000):
-            # point = network.calculate(x)
-            # points.append(network.calculateloss(point, y))
-            network.train(x, y)
+        network.train(x, y)
         print(network.calculate(x))
-        # plt.plot(points)
-        # plt.xlabel("Iterations")
-        # plt.ylabel("Loss")
-        # plt.title("EXAMPLE: Loss over Time")
-        # plt.show()
         
     elif(sys.argv[1]=='and'):
         print('learn AND')
