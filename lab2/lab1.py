@@ -83,9 +83,7 @@ class Neuron:
         for i in range(len(newweights)):
             self.weights.append(newweights[i])
 
-        
-#A fully connected layer 
-#for Matthew       
+#A fully connected layer        
 class FullyConnected:
     #initialize with the number of neurons in the layer, their activation, the input size, 
     # the leraning rate and a 2d matrix of weights (or else initilize randomly)
@@ -142,11 +140,38 @@ class FullyConnected:
         for i in self.neurons:
             i.updateweight()
         return self.wtimesdeltas           
-        
+
+class convolutionalLayer:
+    #always assume stride 1, padding 'valid' for this lab
+    def __init__(self, numKernels, kernSize, activation, inputDim, lr, weights=None):
+        pass
+    def calculate(self):
+        pass
+    def calculatewdeltas(self):
+        pass
+
+class maxPoolingLayer:
+    #assume stride is the same as filter size
+    def __init__(self, kernSize, inputDim):
+        pass
+    def calculate(self):
+        pass
+    def calculatewdeltas(self):
+        pass
+
+class flattenLayer:
+    def __init__(self, inputSize):
+        pass
+    #there will be no neurons here, it just resizes the output of the previous layer from 2d to 1d
+    def calculate(self):
+        pass
+    def calculatewdeltas(self):
+        pass
+
 #An entire neural network 
-#for Steven       
 class NeuralNetwork:
     #now, when you don't provide numOfLayers, numOfNeurons, and activation, you can add to them later
+    # I kept the other init function in here if we need to compare or test, but for the forseeable future we'll be able to add layers
     def __init__(self, inputSize, loss, lr, weights=None):
         self.numL = 0
         self.numN = []
@@ -180,18 +205,26 @@ class NeuralNetwork:
     #             self.layers.append(x)
     
     #addLayer will use self.numouts as it's inputsize and reset self.numouts to be the output size of the new layer
-    def addLayer(self, numOfNeurons, activation, weights=None):
+    # once the other layers are implemented, we need to add to this
+    # layerType = 0: FullyConnected
+    #             1: ConvolutionalLayer
+    #             2: MaxPoolingLayer
+    #             3: FlattenLayer
+    def addLayer(self, numOfNeurons, activation, layerType=0, weights=None):
         act = activation
         numins = self.numouts
         self.numouts = numOfNeurons
         self.numN.append(numOfNeurons)
         self.numL += 1
-        if weights is not None and len(weights) == self.numouts:
-            layer = FullyConnected(numOfNeurons, act, numins, self.lr, weights)
-            self.layers.append(layer)
+        if layerType == 0:
+            if weights is not None and len(weights) == self.numouts:
+                layer = FullyConnected(numOfNeurons, act, numins, self.lr, weights)
+                self.layers.append(layer)
+            else:
+                layer = FullyConnected(numOfNeurons, act, numins, self.lr)
+                self.layers.append(layer)
         else:
-            layer = FullyConnected(numOfNeurons, act, numins, self.lr)
-            self.layers.append(layer)
+            print('currently only support fullyConnected Layers')
 
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,inputs):
