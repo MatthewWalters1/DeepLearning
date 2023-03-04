@@ -14,7 +14,6 @@ loss:
 1 - binary cross entropy
 """
 
-
 # A class which represents a single neuron
 class Neuron:
     #initilize neuron with activation type, number of inputs, learning rate, and possibly with set weights
@@ -147,6 +146,16 @@ class FullyConnected:
 #An entire neural network 
 #for Steven       
 class NeuralNetwork:
+    #now, when you don't provide numOfLayers, numOfNeurons, and activation, you can add to them later
+    def __init__(self, inputSize, loss, lr, weights=None):
+        self.numL = 0
+        self.numN = []
+        self.numinps = inputSize
+        self.activation = []
+        self.loss = loss
+        self.lr = lr
+        self.weights = []
+        self.layers = []
     #initialize with the number of layers, number of neurons in each layer (vector), input size, activation (for each layer), 
     # the loss function, the learning rate and a 3d matrix of weights weights (or else initialize randomly)
     def __init__(self,numOfLayers,numOfNeurons, inputSize, activation, loss, lr, weights=None):
