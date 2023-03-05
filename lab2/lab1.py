@@ -278,7 +278,7 @@ class NeuralNetwork:
     #             1: ConvolutionalLayer
     #             2: MaxPoolingLayer
     #             3: FlattenLayer
-    def addLayer(self, numOfNeurons, activation, layerType=0, weights=None):
+    def addLayer(self, numOfNeurons, activation, numKernels=0, kernSize=0, layerType=0, weights=None):
         act = activation
         numins = self.numouts
         self.numouts = numOfNeurons
@@ -291,8 +291,17 @@ class NeuralNetwork:
             else:
                 layer = FullyConnected(numOfNeurons, act, numins, self.lr)
                 self.layers.append(layer)
-        else:
-            print('currently only support fullyConnected Layers')
+        elif layerType == 1:
+            if self.numL == 0:
+                self.outputDim = self.numinps
+            if weights is not None and len(weights) == kernSize:
+                layer = ConvolutionalLayer(numKernels, kernSize, act, self.outputDim, lr, weights)
+                self.outputDim = layer.outputDim
+                self.layers.append(layer)
+            else:
+                layer = ConvolutionalLayer(numKernels, kernSize, activation, self.outputDim, lr)
+                self.outputDim = layer.outputDim
+                self.layers.append(layer)
 
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,inputs):
