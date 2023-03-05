@@ -141,14 +141,82 @@ class FullyConnected:
             i.updateweight()
         return self.wtimesdeltas           
 
-class convolutionalLayer:
+class ConvolutionalLayer:
     #always assume stride 1, padding 'valid' for this lab
     def __init__(self, numKernels, kernSize, activation, inputDim, lr, weights=None):
-        pass
-    def calculate(self):
-        pass
-    def calculatewdeltas(self):
-        pass
+        self.numKernels=numKernels
+        self.kernSize=kernSize
+        self.activation=activation
+        self.inputDim=inputDim
+        self.lr=lr
+        self.numWeights=kernSize*kernSize*numChannels # not including bias
+        self.numLearnableParameters=(self.numWeights+1)*numKernels
+        self.numNeuronsPerKernel=(inputDim-kernSize+1)*(inputDim-kernSize+1)
+        self.outputDim=(inputDim-kernSize+1)
+        self.weights = []
+        self.neurons = []
+        self.output = []
+        if weights is None or \
+            not (len(weights) == self.numKernels and len(weights[0]) == self.numWeights + 1) or \
+            not (len(weights) == (self.numWeights+1)*self.numKernels):
+            for i in range(self.numKernels):
+                w = []
+                for j in range(self.numWeights + 1):
+                    w.append(np.random.uniform(0.1, 0.9))
+                self.weights.append(w)
+        elif len(weights) == (self.numWeights+1)*self.numKernels:
+            for i in range(self.numKernels):
+                w = []
+                for j in range(self.numWeights+1):
+                    w.append(weights[i*(self.numWeights+1)+j])
+                self.weights.append(w)
+        else:
+            for i in weights:
+                w = []
+                for j in i:
+                    w.append(j)
+                self.weights.append(w)
+        for i in range(self.numKernels):
+            for j in range(self.numNeuronsPerKernel):
+                xs = []
+                x = Neuron(self.activation, self.numWeights+1, self.lr, self.weights[i])
+                xs.append(x)
+            self.neurons.append(xs)
+    def calculate(self, input):
+        self.output = []
+        for k in range(self.numKernels):
+            fea_map = []
+            for neu in self.neurons[k]:
+                fea_map.append(neu.calculate())
+            self.output.append(fea_map)
+        
+    def calculatewdeltas(self, wtimesdelta):
+        self.wdeltas = []
+        for k in range(self.numKernels):
+            perKer=[]
+            for i in range(self.numNeuronsPerKernel):
+                x = self.neurons[k][i].calcpartialderivative(wtimesdelta[k][i])
+                perKer.append(x)
+            self.wdeltas.append(perKer)
+        self.wtimesdeltas = []
+        for k in range(self.numKernels):
+            perKer = []
+            for row in range(self.kernSize):
+                for column in range(self.kernSize):
+                    y = 0
+                    for i in range(self.outputDim):
+                        for j in range(self.outputDim):
+                            y += self.wdeltas[k][j*self.outputDim+i][column*self.kernSize+row]
+                    perKer.append(y)
+            y = 0
+            for row in range(self.kernSize):
+                for column in range(self.kernSize):
+                    y += self.wdeltas[k][self.kernSize**2][column*self.kernSize+row]
+            perKer.append(y)
+            self.wtimesdeltas.append(perKer)
+        for i in self.neurons:
+            i.updateweight()
+        return self.wtimesdeltas
 
 class maxPoolingLayer:
     #assume stride is the same as filter size
