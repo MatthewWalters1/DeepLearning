@@ -195,8 +195,8 @@ class ConvolutionalLayer:
                 #to make this work, we need to split up the inputs among the neurons, each neuron doesn't get all of them
                 # plus, it's probably easier to divide them up here if we can, rather than change neuron.calculate
                 myinputs = []
-                # this isn't how we need to split them up, but for testing, this is easier
-                for i in inputs[k%3]:
+                # we need some kind of if statement in this loop to make each neuron only see the inputs within it's kernel
+                for i in inputs:
                     myinputs.append(i)
                 print("length of myinputs = ", len(myinputs))
                 fea_map.append(neu.calculate(myinputs))
@@ -444,32 +444,38 @@ if __name__=="__main__":
     elif (sys.argv[1] == 'param'):
         #Generate data and weights for "example2"
         l1k1,l1k2,l1b1,l1b2,l2k1,l2b,l3,l3b,x,y = parameters.generateExample2()
+        newl = []
+        for i in x:
+            for j in i:
+                newl.append(j)
+        x = newl.copy()
         network = NeuralNetwork(7, 0, .5)
         l1k1 = list(l1k1)
         newl = []
-        #flatten the l1k1
+        #flatten the l1k1, add the bias on the end
         for i in l1k1:
             for j in i:
                 newl.append(j)
         l1k1 = newl.copy()
-        l1k1.append(l1b1)
+        l1k1.append(l1b1[0])
+        print(l1k1)
         l1k2 = list(l1k2)
         newl = []
         for i in l1k2:
             for j in i:
                 newl.append(j)
         l1k2 = newl.copy()
-        l1k2.append(l1b2)
+        l1k2.append(l1b2[0])
         #not sure how to make 2 kernels work, but this is the network, but calculate doesn't currently work
-        network.addLayer(9,1,2,2,1,2,1,[[l1k1],[l1k2]])
+        network.addLayer([9,9],1,2,2,1,2,1,[[l1k1],[l1k2]])
         l2k1 = list(l2k1)
         newl = []
         for i in l2k1:
             for j in i:
                 newl.append(j)
         l2k1 = newl.copy()
-        l2k1.append(l2b)
-        network.addLayer(18, 1, 1, 3, 2, 1, 1, [[l2k1], [l2b]])
+        l2k1.append(l2b[0])
+        network.addLayer(18, 1, 1, 3, 2, 1, 1, [[l2k1]])
         l3 = list(l3)
         l3.append(l3b)
         network.addLayer(9, 1, weights=[l3])
