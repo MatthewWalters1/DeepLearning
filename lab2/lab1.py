@@ -446,11 +446,7 @@ def flat(x):
 
 if __name__=="__main__":
     if (len(sys.argv)<2):
-        x = np.array([[1,0,1],[1,1,0],[0,1,1]])
-        network = NeuralNetwork(9,0,.5)
-        network.addLayer(4,1,4,2,1,1,1)
-        print("weights[0]:",network.layers[0].weights)
-        print("calculate:",network.calculate(x))
+        print('try using the arguments example1, example2, or example3')
 
     elif (sys.argv[1] == 'example'):
         print('making the lab1 example from class but with addLayer')
@@ -464,31 +460,37 @@ if __name__=="__main__":
         print(network.calculate(x))
         network.train(x,y)
         print(network.calculate(x))
-
-    elif (sys.argv[1] == 'param'):
+    elif (sys.argv[1] == 'example1'):
+        network = NeuralNetwork(5, 0, .5)
+        x = np.random.rand(5,5)
+        x = flat(x)
+        x.append(np.random.rand(1))
+        #3x3 conv, 1 kernel (didn't say what the size of the kernel should be)
+        network.addLayer([3,3], 1, 1, 2, 1, 1, 1)
+        #flatten layer
+        network.addLayer(9,1,layerType=3)
+        #1 neuron
+        network.addLayer(1, 1)
+    elif (sys.argv[1] == 'example2'):
         #Generate data and weights for "example2"
         l1k1,l1k2,l1b1,l1b2,l2k1,l2b,l3,l3b,x,y = parameters.generateExample2()
         #flatten x
         x = flat(x)
         network = NeuralNetwork(7, 0, .5)
         #flatten l1k1 and append the bias
-        l1k1 = list(l1k1)
         l1k1 = flat(l1k1)
         l1k1.append(l1b1[0])
         print(l1k1)
-        l1k2 = list(l1k2)
         l1k2 = flat(l1k2)
         l1k2.append(l1b2[0])
         network.addLayer([9,9],1,2,2,1,2,1,[[l1k1],[l1k2]])
         #flatten l2k1 (add bias), it has 2 channels
-        l2k1 = list(l2k1)
         l2k1 = flat(l2k1)
         l2k1.append(l2b[0])
         network.addLayer(18, 1, 1, 3, 2, 1, 1, [[l2k1]])
         #flatten layer in between l2k1 and l3 
         # (I think flatten layer is redundant if you don't make your convolution lists 2d, even if you treat them as 2d internally)
         network.addLayer(18,0,layerType=3)
-        l3 = list(l3)
         l3.append(l3b)
         network.addLayer(9, 1, weights=[l3])
         print(network.calculate(x))
