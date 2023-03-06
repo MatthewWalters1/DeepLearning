@@ -254,11 +254,34 @@ class maxPoolingLayer:
         self.numInputs=numInputs
         self.inputSize=inputSize
         self.outputSize=np.ceil(inputSize/kernSize)
+        self.maxInputLocations = []
+        self.maxOutputLocations = []
 
     def calculate(self, inputs):
+        self.maxInputLocations = []
+        self.maxOutputLocations = []
         outputs = []
         for channel in range(self.inputSize):
-            
+            self.maxInputLocations.append([])
+            self.maxOutputLocations.append([])
+            output_table = []
+            for ocol in range(self.outputSize):
+                for orow in range(self.outputSize):
+                    for kcol in range(self.kernSize):
+                        for krow in range(self.kernSize):
+                            outputIndex = ocol*self.outputSize+orow
+                            inputIndex = (ocol*self.kernSize+kcol)*self.inputSize + (orow*self.kernSize+krow)
+                            if len(inputs[channel]) <= inputIndex: continue
+                            if(krow==0 & kcol==0):
+                                self.maxInputLocations[channel].append(inputIndex)
+                                self.maxOutputLocations[channel].append(outputIndex)
+                                output_table[outputIndex] = inputs[channel][inputIndex]
+                            else:
+                                oldMax = output_table[outputIndex]
+                                newValue = inputs[channel][inputIndex]
+                                if newValue > oldMax:
+                                    self.maxInputLocations[channel][ocol*self.outputSize+orow] = inputIndex
+                                output_table[outputIndex] = newValue
             outputs.append(channel)        
 
     def calculatewdeltas(self):
