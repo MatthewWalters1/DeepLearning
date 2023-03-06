@@ -294,7 +294,8 @@ class maxPoolingLayer:
                                 output_table[outputIndex] = newValue
             outputs.append(channel)        
 
-    def calculatewdeltas(self):
+    def calculatewdeltas(self, wtimesdeltas):
+        #given wtimesdeltas, return a list filled with zeroes except for the maxInputLocations, where the wtimesdeltas will go
         pass
 
 class FlattenLayer:
@@ -310,11 +311,11 @@ class FlattenLayer:
         for i in input:
             self.output.append(j)
         return self.output
-    def calculatewdeltas(self, wdeltas):
+    def calculatewdeltas(self, wtimesdelta):
         #here, given the wdeltas from the next layer, it gives them to the appropriate neurons in the previous one
         #but, because calculate is identical to the previous layer, you just take wdeltas and send it back a layer
         deltaw = []
-        for i in wdeltas:
+        for i in wtimesdelta:
             deltaw.append(i)
         return deltaw
 
