@@ -1,3 +1,4 @@
+from turtle import xcor
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
@@ -182,12 +183,13 @@ class ConvolutionalLayer:
                 x = Neuron(self.activation, self.numWeights+1, self.lr, self.weights[i])
                 xs.append(x)
             self.neurons.append(xs)
-    def calculate(self, input):
+
+    def calculate(self, inputs):
         self.output = []
         for k in range(self.numKernels):
             fea_map = []
             for neu in self.neurons[k]:
-                fea_map.append(neu.calculate())
+                fea_map.append(neu.calculate(inputs))
             self.output.append(fea_map)
         
     def calculatewdeltas(self, wtimesdelta):
@@ -200,23 +202,49 @@ class ConvolutionalLayer:
             self.wdeltas.append(perKer)
         self.wtimesdeltas = []
         for k in range(self.numKernels):
-            perKer = []
-            for row in range(self.kernSize):
-                for column in range(self.kernSize):
-                    y = 0
-                    for i in range(self.outputDim):
-                        for j in range(self.outputDim):
-                            y += self.wdeltas[k][j*self.outputDim+i][column*self.kernSize+row]
-                    perKer.append(y)
-            y = 0
-            for row in range(self.kernSize):
-                for column in range(self.kernSize):
-                    y += self.wdeltas[k][self.kernSize**2][column*self.kernSize+row]
-            perKer.append(y)
-            self.wtimesdeltas.append(perKer)
+            y = []
+            for i in range(self.inputDim):
+                y.append(0)
+            self.wtimesdeltas.append(y)
+        for k in range(self.numKernels):
+            for drow in range(self.outputDim):
+                for dcol in range(self.outputDim):
+                    for wrow in range(self.kernSize):
+                        for wcol in range(self.kernSize):
+                            self.wtimesdeltas[k][ \
+                                (dcol+wcol)*self.inputDim + (drow+wrow)
+                                ] += self.wdeltas[k][ \
+                                dcol*self.outputDim + drow][ \
+                                wcol*self.kernSize + wrow]                 
         for i in self.neurons:
             i.updateweight()
         return self.wtimesdeltas
+        # self.wdeltas = []
+        # for k in range(self.numKernels):
+        #     perKer=[]
+        #     for i in range(self.numNeuronsPerKernel):
+        #         x = self.neurons[k][i].calcpartialderivative(wtimesdelta[k][i])
+        #         perKer.append(x)
+        #     self.wdeltas.append(perKer)
+        # self.wtimesdeltas = []
+        # for k in range(self.numKernels):
+        #     perKer = []
+        #     for row in range(self.outputDim):
+        #         for column in range(self.outputDim):
+        #             y = 0
+        #             for i in range(self.kernSize):
+        #                 for j in range(self.kernSize):
+        #                     y += self.wdeltas[k][column*self.outputDim+row][j*self.kernSize+i]
+        #             perKer.append(y)
+        #     y = 0
+        #     for row in range(self.kernSize):
+        #         for column in range(self.kernSize):
+        #             y += self.wdeltas[k][self.kernSize**2][column*self.kernSize+row]
+        #     perKer.append(y)
+        #     self.wtimesdeltas.append(perKer)
+        # for i in self.neurons:
+        #     i.updateweight()
+        # return self.wtimesdeltas
 
 class maxPoolingLayer:
     #assume stride is the same as filter size
