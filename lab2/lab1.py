@@ -461,6 +461,7 @@ if __name__=="__main__":
         network.train(x,y)
         print(network.calculate(x))
     elif (sys.argv[1] == 'example1'):
+        np.random.seed(10)
         network = NeuralNetwork(5, 0, .5)
         x = np.random.rand(5,5)
         x = flat(x)
@@ -471,6 +472,7 @@ if __name__=="__main__":
         network.addLayer(9,1,layerType=3)
         #1 neuron
         network.addLayer(1, 1)
+        
     elif (sys.argv[1] == 'example2'):
         #Generate data and weights for "example2"
         l1k1,l1k2,l1b1,l1b2,l2k1,l2b,l3,l3b,x,y = parameters.generateExample2()
@@ -494,3 +496,16 @@ if __name__=="__main__":
         l3.append(l3b)
         network.addLayer(9, 1, weights=[l3])
         print(network.calculate(x))
+    
+
+    elif (sys.argv[1] == 'example3'):
+        np.random.seed(10)
+        #8x8 input, 3x3 conv w/ 2kernels, 2x2 max pooling, flatten layer, 1 neuron output
+        x = np.random.rand(8,8)
+        x = flat(x)
+        x.append(np.random.rand(1))
+        network = NeuralNetwork(8, 1, .5)
+        network.addLayer([3,3], 1, 2, 2, 1, 1, 1)
+        network.addLayer([2,2], 1, numChannels=1, layerType=2)
+        network.addLayer(1, 1)
+        
