@@ -46,6 +46,10 @@ class Neuron:
         x = 0
         #   here, I put range(len(input)) + 1, so the bias would be included, 
         #       and when it gets to the bias, the input is always 1, hence the if statement
+        print(f"self.numInputs {self.numInputs}")
+        print(f"self.lr {self.lr}")
+        print(f"self.weights {self.weights}")
+        print(f"len {len(self.input)}")
         for i in range(len(inputs) + 1):
             if i >= len(inputs):
                 x += 1*self.weights[i]
@@ -180,26 +184,32 @@ class ConvolutionalLayer:
                 for j in i:
                     w.append(j)
                 self.weights.append(w)
-        for i in range(self.numKernels):
+        for k in range(self.numKernels):
             for j in range(self.numNeuronsPerKernel):
                 xs = []
-                x = Neuron(self.activation, self.numWeightsPerKernel+1, self.lr, self.weights[i])
+                x = Neuron(self.activation, self.numWeightsPerKernel+1, self.lr, self.weights[k])
                 xs.append(x)
             self.neurons.append(xs)
 
     def calculate(self, inputs):
+        self.inputs = inputs
         self.outputs = []
+        print("length of inputs = ", len(inputs))
+        print("length of inputs[0] = ", len(inputs[0]))
         for k in range(self.numKernels):
             fea_map = []
-            for neu in self.neurons[k]:
-                #to make this work, we need to split up the inputs among the neurons, each neuron doesn't get all of them
-                # plus, it's probably easier to divide them up here if we can, rather than change neuron.calculate
-                myinputs = []
-                # we need some kind of if statement in this loop to make each neuron only see the inputs within it's kernel
-                for i in inputs:
-                    myinputs.append(i)
-                print("length of myinputs = ", len(myinputs))
-                fea_map.append(neu.calculate(myinputs))
+            for orow in range(self.outputSize):
+                for ocol in range(self.outputSize):
+                    neuron = self.neurons[k][ocol*self.outputSize+orow]
+                    #to make this work, we need to split up the inputs among the neurons, each neuron doesn't get all of them
+                    # plus, it's probably easier to divide them up here if we can, rather than change neuron.calculate
+                    neuInputs = []
+                    # we need some kind of if statement in this loop to make each neuron only see the inputs within it's kernel
+                    for krow in range(self.kernSize):
+                        for kcol in range(self.kernSize):
+                            neuInputs.append(inputs[k][(ocol+kcol)*self.inputSize + (orow+krow)])
+                    print("length of myinputs = ", len(neuInputs))
+                    fea_map.append(neu.calculate(neuInputs))     
             self.outputs.append(fea_map)
         return self.outputs
         
@@ -408,6 +418,8 @@ class NeuralNetwork:
 
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,inputs):
+        print(f"len(inputs {len(inputs)}")
+        print(f"len(inputs {len(inputs[0])}")
         self.input = inputs
         output = inputs
         for i in self.layers:
@@ -480,13 +492,18 @@ if __name__=="__main__":
     elif (sys.argv[1] == 'example1'):
         np.random.seed(10)
         network = NeuralNetwork(1, 5, 0, .5)
-        x = np.random.rand(5)
+        x = [np.random.rand(5*5)]
         #3x3 conv, 1 kernel (didn't say what the size of the kernel should be)
-        network.addLayer(numKernels, 1, 1, 2, 1, 1, 1)
-        #flatten layer
-        network.addLayer(9,1,layerType=3)
-        #1 neuron
-        network.addLayer(1, 1)
+        network.addLayer(1, kernSize=3, numKernels=1, layerType=1, weights=[x])
+        print(network.calculate(x))
+        for i in range(1):
+            network.train(x,y)
+        print(network.calculate(x))
+
+        # #flatten layer
+        # network.addLayer(,1,layerType=3)
+        # #1 neuron
+        # network.addLayer(1, 1)
         
     elif (sys.argv[1] == 'example2'):
         #Generate data and weights for "example2"
