@@ -315,7 +315,7 @@ class NeuralNetwork:
     #             1: ConvolutionalLayer
     #             2: MaxPoolingLayer
     #             3: FlattenLayer
-    def addLayer(self, numOfNeurons, activation, numKernels=0, kernSize=0, layerType=0, weights=None):
+    def addLayer(self, numOfNeurons, activation, numKernels=0, kernSize=0, numChannels=0, numFilters=0, layerType=0, weights=None):
         act = activation
         numins = self.numouts
         self.numouts = numOfNeurons
@@ -332,7 +332,7 @@ class NeuralNetwork:
             # add numInputs, inputSize from above
             if self.numL == 0:
                 self.outputDim = self.numinps
-            if weights is not None and len(weights) == kernSize:
+            if weights is not None and len(weights) == kernSize**2 * (numChannels + 1) * (numFilters):
                 layer = ConvolutionalLayer(numKernels, kernSize, act, self.outputDim, lr, weights)
                 self.outputDim = layer.outputDim
                 self.layers.append(layer)
