@@ -155,7 +155,7 @@ class ConvolutionalLayer:
         self.numOutputs=numKernels
         self.numWeightsPerKernel=kernSize*kernSize*numInputs # not including bias
         self.numLayersearnableParameters=(self.numWeightsPerKernel+1)*numKernels
-        self.numNeuronseuronsPerKernel=(inputSize-kernSize+1)**2
+        self.numNeuronsPerKernel=(inputSize-kernSize+1)**2
         self.outputSize=(inputSize-kernSize+1)
         self.weights = []
         self.neurons = []
@@ -181,7 +181,7 @@ class ConvolutionalLayer:
                     w.append(j)
                 self.weights.append(w)
         for i in range(self.numKernels):
-            for j in range(self.numNeuronseuronsPerKernel):
+            for j in range(self.numNeuronsPerKernel):
                 xs = []
                 x = Neuron(self.activation, self.numWeightsPerKernel+1, self.lr, self.weights[i])
                 xs.append(x)
@@ -207,7 +207,7 @@ class ConvolutionalLayer:
         self.wdeltas = []
         for k in range(self.numOutputs):
             perKer=[]
-            for i in range(self.numNeuronseuronsPerKernel):
+            for i in range(self.numNeuronsPerKernel):
                 x = self.neurons[k][i].calcpartialderivative(wtimesdelta[k][i])
                 perKer.append(x)
             self.wdeltas.append(perKer)
@@ -227,13 +227,23 @@ class ConvolutionalLayer:
                                 ] += self.wdeltas[k][ \
                                 dcol*self.outputSize + drow][ \
                                 wcol*self.kernSize + wrow]
-        for i in self.neurons:
-            i.updateweight()
+        updatedWeights = []
+        for k in range(self.numKernels):
+            wsPDeriv = []
+            for w in range(self.numWeightsPerKernel) :
+                wPDeriv = 0
+                for neur in range(self.numNeuronsPerKernel):
+                    wPDeriv += wtimesdelta[k][neur][w]*self.outputs[k][neur]
+                wsPDeriv.append(wPDeriv)
+            updatedWeights.append(wsPDeriv)
+        self.weights = updatedWeights 
+                
+            
         return self.wtimesdeltas
         # self.wdeltas = []
         # for k in range(self.numKernels):
         #     perKer=[]
-        #     for i in range(self.numNeuronseuronsPerKernel):
+        #     for i in range(self.numNeuronsPerKernel):
         #         x = self.neurons[k][i].calcpartialderivative(wtimesdelta[k][i])
         #         perKer.append(x)
         #     self.wdeltas.append(perKer)
@@ -469,10 +479,10 @@ if __name__=="__main__":
 
     elif (sys.argv[1] == 'example1'):
         np.random.seed(10)
-        network = NeuralNetwork(5, 0, .5)
-        x = np.random.rand(55)
+        network = NeuralNetwork(1, 5, 0, .5)
+        x = np.random.rand(5)
         #3x3 conv, 1 kernel (didn't say what the size of the kernel should be)
-        network.addLayer([3,3], 1, 1, 2, 1, 1, 1)
+        network.addLayer(numKernels, 1, 1, 2, 1, 1, 1)
         #flatten layer
         network.addLayer(9,1,layerType=3)
         #1 neuron
