@@ -297,14 +297,26 @@ class maxPoolingLayer:
     def calculatewdeltas(self):
         pass
 
-class flattenLayer:
+class FlattenLayer:
     def __init__(self, inputSize):
-        pass
+        self.inputSize = inputSize
     #there will be no neurons here, it just resizes the output of the previous layer from 2d to 1d
-    def calculate(self):
-        pass
-    def calculatewdeltas(self):
-        pass
+    def calculate(self, input):
+        self.output = []
+        if len(input) != inputSize**2:
+            print("input of incorrect size, fully connected layers won't work right")
+        #because we index our convolutions in 1d (even though their treated as if they're 2d), this won't really do anything, 
+        # it's just a buffer so the next layer can be fully connected
+        for i in input:
+            self.output.append(j)
+        return self.output
+    def calculatewdeltas(self, wdeltas):
+        #here, given the wdeltas from the next layer, it gives them to the appropriate neurons in the previous one
+        #but, because calculate is identical to the previous layer, you just take wdeltas and send it back a layer
+        deltaw = []
+        for i in wdeltas:
+            deltaw.append(i)
+        return deltaw
 
 #An entire neural network 
 class NeuralNetwork:
@@ -357,9 +369,11 @@ class NeuralNetwork:
         if layerType == 0:
             if weights is not None:
                 layer = FullyConnected(numOfNeurons, act, numins, self.lr, weights)
+                self.outputDim = numOfNeurons
                 self.layers.append(layer)
             else:
                 layer = FullyConnected(numOfNeurons, act, numins, self.lr)
+                self.outputDim = numOfNeurons
                 self.layers.append(layer)
         elif layerType == 1:
             # add numInputs, inputSize from above
@@ -373,6 +387,10 @@ class NeuralNetwork:
                 layer = ConvolutionalLayer(numKernels, kernSize, activation, self.numinps, self.outputDim, self.lr)
                 self.outputDim = layer.outputSize
                 self.layers.append(layer)
+        elif layerType == 3:
+            layer = FlattenLayer(self.outputDim)
+            self.outputDim = self.outputDim**2
+            self.layers.append(layer)
 
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,inputs):
@@ -419,6 +437,12 @@ class NeuralNetwork:
             ld.append(self.lossderiv(output[i], y[i]))
         for i in reversed(range(len(self.layers))):
            ld = self.layers[i].calcwdeltas(ld)
+def flat(x):
+    newl = []
+    for i in x:
+        for j in i:
+            newl.append(j)
+    return newl.copy()
 
 if __name__=="__main__":
     if (len(sys.argv)<2):
@@ -444,38 +468,26 @@ if __name__=="__main__":
     elif (sys.argv[1] == 'param'):
         #Generate data and weights for "example2"
         l1k1,l1k2,l1b1,l1b2,l2k1,l2b,l3,l3b,x,y = parameters.generateExample2()
-        newl = []
-        for i in x:
-            for j in i:
-                newl.append(j)
-        x = newl.copy()
+        #flatten x
+        x = flat(x)
         network = NeuralNetwork(7, 0, .5)
+        #flatten l1k1 and append the bias
         l1k1 = list(l1k1)
-        newl = []
-        #flatten the l1k1, add the bias on the end
-        for i in l1k1:
-            for j in i:
-                newl.append(j)
-        l1k1 = newl.copy()
+        l1k1 = flat(l1k1)
         l1k1.append(l1b1[0])
         print(l1k1)
         l1k2 = list(l1k2)
-        newl = []
-        for i in l1k2:
-            for j in i:
-                newl.append(j)
-        l1k2 = newl.copy()
+        l1k2 = flat(l1k2)
         l1k2.append(l1b2[0])
-        #not sure how to make 2 kernels work, but this is the network, but calculate doesn't currently work
         network.addLayer([9,9],1,2,2,1,2,1,[[l1k1],[l1k2]])
+        #flatten l2k1 (add bias), it has 2 channels
         l2k1 = list(l2k1)
-        newl = []
-        for i in l2k1:
-            for j in i:
-                newl.append(j)
-        l2k1 = newl.copy()
+        l2k1 = flat(l2k1)
         l2k1.append(l2b[0])
         network.addLayer(18, 1, 1, 3, 2, 1, 1, [[l2k1]])
+        #flatten layer in between l2k1 and l3 
+        # (I think flatten layer is redundant if you don't make your convolution lists 2d, even if you treat them as 2d internally)
+        network.addLayer(18,0,layerType=3)
         l3 = list(l3)
         l3.append(l3b)
         network.addLayer(9, 1, weights=[l3])
