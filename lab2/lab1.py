@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
+import parameters
 """
 Matthew Walters - Steven Koprowicz
 2/13/23
@@ -45,8 +46,8 @@ class Neuron:
         x = 0
         #   here, I put range(len(input)) + 1, so the bias would be included, 
         #       and when it gets to the bias, the input is always 1, hence the if statement
-        for i in range(self.numinps + 1):
-            if i >= self.numinps:
+        for i in range(len(inputs) + 1):
+            if i >= len(inputs):
                 x += 1*self.weights[i]
             else:
                 x += self.input[i]*self.weights[i]
@@ -82,6 +83,7 @@ class Neuron:
         self.weights = []
         for i in range(len(newweights)):
             self.weights.append(newweights[i])
+        return self.weights
 
 #A fully connected layer        
 class FullyConnected:
@@ -152,8 +154,8 @@ class ConvolutionalLayer:
         self.lr=lr
         self.numOutputs=numKernels
         self.numWeightsPerKernel=kernSize*kernSize*numInputs # not including bias
-        self.numLearnableParameters=(self.numWeights+1)*numKernels
-        self.numNeuronsPerKernel=(inputSize-kernSize+1)*(inputSize-kernSize+1)
+        self.numLearnableParameters=(self.numWeightsPerKernel+1)*numKernels
+        self.numNeuronsPerKernel=(inputSize-kernSize+1)**2
         self.outputSize=(inputSize-kernSize+1)
         self.weights = []
         self.neurons = []
@@ -190,8 +192,16 @@ class ConvolutionalLayer:
         for k in range(self.numKernels):
             fea_map = []
             for neu in self.neurons[k]:
-                fea_map.append(neu.calculate(inputs))
-            self.output.append(fea_map)
+                #to make this work, we need to split up the inputs among the neurons, each neuron doesn't get all of them
+                # plus, it's probably easier to divide them up here if we can, rather than change neuron.calculate
+                myinputs = []
+                # this isn't how we need to split them up, but for testing, this is easier
+                for i in inputs[k%3]:
+                    myinputs.append(i)
+                print("length of myinputs = ", len(myinputs))
+                fea_map.append(neu.calculate(myinputs))
+            self.outputs.append(fea_map)
+        return self.outputs
         
     def calculatewdeltas(self, wtimesdelta):
         self.wdeltas = []
@@ -300,7 +310,7 @@ class flattenLayer:
 class NeuralNetwork:
     #now, when you don't provide numOfLayers, numOfNeurons, and activation, you can add to them later
     # I kept the other init function in here if we need to compare or test, but for the forseeable future we'll be able to add layers
-    def __init__(self, inputSize, loss, lr, weights=None):
+    def __init__(self, inputSize, loss, lr):
         self.numL = 0
         self.numN = []
         self.numinps = inputSize
@@ -345,7 +355,7 @@ class NeuralNetwork:
         self.numN.append(numOfNeurons)
         self.numL += 1
         if layerType == 0:
-            if weights is not None and len(weights) == self.numouts:
+            if weights is not None:
                 layer = FullyConnected(numOfNeurons, act, numins, self.lr, weights)
                 self.layers.append(layer)
             else:
@@ -353,15 +363,15 @@ class NeuralNetwork:
                 self.layers.append(layer)
         elif layerType == 1:
             # add numInputs, inputSize from above
-            if self.numL == 0:
-                self.outputDim = self.numinps
+            if self.numL == 1:
+                self.outputDim = int(np.sqrt(self.numinps))
             if weights is not None and len(weights) == kernSize**2 * (numChannels + 1) * (numFilters):
                 layer = ConvolutionalLayer(numKernels, kernSize, act, self.outputDim, lr, weights)
                 self.outputDim = layer.outputDim
                 self.layers.append(layer)
             else:
-                layer = ConvolutionalLayer(numKernels, kernSize, activation, self.outputDim, lr)
-                self.outputDim = layer.outputDim
+                layer = ConvolutionalLayer(numKernels, kernSize, activation, self.numinps, self.outputDim, self.lr)
+                self.outputDim = layer.outputSize
                 self.layers.append(layer)
 
     #Given an input, calculate the output (using the layers calculate() method)
@@ -412,143 +422,55 @@ class NeuralNetwork:
 
 if __name__=="__main__":
     if (len(sys.argv)<2):
-        print('making the example from class but with addLayer')
+        x = np.array([[1,0,1],[1,1,0],[0,1,1]])
+        network = NeuralNetwork(9,0,.5)
+        network.addLayer(4,1,4,2,1,1,1)
+        print("weights[0]:",network.layers[0].weights)
+        print("calculate:",network.calculate(x))
+
+    elif (sys.argv[1] == 'example'):
+        print('making the lab1 example from class but with addLayer')
         w1 = np.array([[.15,.2,.35],[.25,.3,.35]])
         w2 = np.array([[.4,.45,.6],[.5,.55,.6]])
         x = np.array([0.05,0.1])
         y = np.array([0.01,0.99])
         network = NeuralNetwork(2, 0, .5)
-        network.addLayer(2, 1, w1)
-        network.addLayer(2, 1, w2)
+        network.addLayer(2, 1, weights=w1)
+        network.addLayer(2, 1, weights=w2)
         print(network.calculate(x))
         network.train(x,y)
         print(network.calculate(x))
-        
-    elif (sys.argv[1]=='example'):
-        print('run example from class (single step)')
-        w=np.array([[[.15,.2,.35],[.25,.3,.35]],[[.4,.45,.6],[.5,.55,.6]]])
-        x=np.array([0.05,0.1])
-        y=np.array([0.01,0.99])
-        network = NeuralNetwork(2, [2,2], 2, [1,1], 0, .5, w)
-        print(network.calculate(x))
-        network.train(x, y)
-        print(network.calculate(x))
-        
-    elif(sys.argv[1]=='and'):
-        print('learn AND')
-        x = np.array([[0,0], [0,1], [1,0], [1,1]])
-        y = np.array([[0],[0],[0],[1]])
-        a = [0,0,0,0]
-        # a single perceptron (logistic activation, binary cross entropy loss, .5 learning rate, random weights)
-        network = NeuralNetwork(1, [1], 2, [1], 1, .5)
-        count = 0
-        # points = []
-        for i in x:
-            print(i,":", network.calculate(i))
-        while (a != [1,1,1,1]):
-            for i in range(len(x)):
-                con = network.calculate(x[i])[0]
-                # points.append(network.calculateloss(con,y[i]))
-                network.train(x[i], y[i])
-                # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
-                if abs(con - network.calculate(x[i])[0]) < 10**(-2):
-                    a[i] = 1
-            count += 1
-            if count == 10000:
-                print("does not converge")
-                break
-            elif a == [1,1,1,1]:
-                print("converged")
-        for i in x:
-            print(i,":", network.calculate(i))
-    elif(sys.argv[1]=='andl'):
-        print('learnAND with addlayer')
-        x = np.array([[0,0], [0,1], [1,0], [1,1]])
-        y = np.array([[0], [0], [0], [1]])
-        a = [0,0,0,0]
-        network = NeuralNetwork(2, 1, .5)
-        network.addLayer(1, 1)
-        count = 0
-        for i in x:
-            print(i,":",network.calculate(i))
-        while (a != [1,1,1,1]):
-            for i in range(len(x)):
-                con = network.calculate(x[i])[0]
-                # points.append(network.calculateloss(con,y[i]))
-                network.train(x[i], y[i])
-                # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
-                if abs(con - network.calculate(x[i])[0]) < 10**(-2):
-                    a[i] = 1
-            count += 1
-            if count == 10000:
-                print("does not converge")
-                break
-            elif a == [1,1,1,1]:
-                print("converged")
-        for i in x:
-            print(i,":", network.calculate(i))
-            
 
-    elif(sys.argv[1]=='xor'):
-        print('learn XOR')
-        x = np.array([[0,0], [0,1], [1,0], [1,1]])
-        y = np.array([[0], [1], [1], [0]])
-        # 1 perceptron (logistic activation, binary cross entropy loss, .5 learning rate, random weights)
-        network = NeuralNetwork(1, [1], 2, [1], 1, .5)
-        a = [0,0,0,0]
-        print("Starting Training on 1 perceptron")
-        for i in x:
-            print(i,":", network.calculate(i))
-        count = 0
-        # points = []
-        while (a != [1,1,1,1]):
-            for i in range(len(x)):
-                con = network.calculate(x[i])[0]
-                # points.append(network.calculateloss(con, y[i]))
-                network.train(x[i], y[i])
-                # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
-                if abs(con - network.calculate(x[i])[0]) < 10**(-2):
-                    a[i] = 1
-            count += 1
-            if count == 10000:
-                print("does not converge")
-                break
-            if a == [1,1,1,1]:
-                print("converged")
-        # plt.plot(points)
-        # plt.xlabel("Iterations")
-        # plt.ylabel("Loss")
-        # plt.title("XOR with 1 Perceptron: Loss over Time")
-        # plt.show()
-        for i in x:
-            print(i,":", network.calculate(i))
-        # 1 output perceptron plus a hidden layer, also one perceptron 
-        # (logistic activation, binary cross entropy loss, .5 learning rate, random weights)
-        # with less than 4 neurons in the hidden layer, it won't always converge
-        network = NeuralNetwork(2, [4,1], 2, [1,1], 1, .5)
-        print("Starting Training with a hidden layer")
-        for i in x:
-            print(i,":", network.calculate(i))
-        count = 0
-        # points = []
-        while (a != [1,1,1,1]):
-            for i in range(len(x)):
-                con = network.calculate(x[i])[0]
-                # points.append(network.calculateloss(con, y[i]))
-                network.train(x[i], y[i])
-                # checking for convergence, if the weight isn't changed at all for all sets of inputs, we're done
-                if abs(con - network.calculate(x[i])[0]) < 10**(-2):
-                    a[i] = 1
-            count += 1
-            if count == 10000:
-                print("does not converge")
-                break
-            if a == [1,1,1,1]:
-                print("converged")
-        for i in x:
-            print(i,":", network.calculate(i))
-        # plt.plot(points)
-        # plt.xlabel("Iterations")
-        # plt.ylabel("Loss")
-        # plt.title("XOR with a hidden layer: Loss over Time")
-        # plt.show()
+    elif (sys.argv[1] == 'param'):
+        #Generate data and weights for "example2"
+        l1k1,l1k2,l1b1,l1b2,l2k1,l2b,l3,l3b,x,y = parameters.generateExample2()
+        network = NeuralNetwork(7, 0, .5)
+        l1k1 = list(l1k1)
+        newl = []
+        #flatten the l1k1
+        for i in l1k1:
+            for j in i:
+                newl.append(j)
+        l1k1 = newl.copy()
+        l1k1.append(l1b1)
+        l1k2 = list(l1k2)
+        newl = []
+        for i in l1k2:
+            for j in i:
+                newl.append(j)
+        l1k2 = newl.copy()
+        l1k2.append(l1b2)
+        #not sure how to make 2 kernels work, but this is the network, but calculate doesn't currently work
+        network.addLayer(9,1,2,2,1,2,1,[[l1k1],[l1k2]])
+        l2k1 = list(l2k1)
+        newl = []
+        for i in l2k1:
+            for j in i:
+                newl.append(j)
+        l2k1 = newl.copy()
+        l2k1.append(l2b)
+        network.addLayer(18, 1, 1, 3, 2, 1, 1, [[l2k1], [l2b]])
+        l3 = list(l3)
+        l3.append(l3b)
+        network.addLayer(9, 1, weights=[l3])
+        print(network.calculate(x))
