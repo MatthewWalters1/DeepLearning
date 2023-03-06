@@ -143,32 +143,34 @@ class FullyConnected:
 
 class ConvolutionalLayer:
     #always assume stride 1, padding 'valid' for this lab
-    def __init__(self, numKernels, kernSize, activation, inputDim, lr, weights=None):
+    def __init__(self, numKernels, kernSize, activation, numInputs, inputSize, lr, weights=None):
         self.numKernels=numKernels
         self.kernSize=kernSize
         self.activation=activation
-        self.inputDim=inputDim
+        self.numInputs=numInputs
+        self.inputSize=inputSize
         self.lr=lr
-        self.numWeights=kernSize*kernSize*numChannels # not including bias
+        self.numOutputs=numKernels
+        self.numWeightsPerKernel=kernSize*kernSize*numInputs # not including bias
         self.numLearnableParameters=(self.numWeights+1)*numKernels
-        self.numNeuronsPerKernel=(inputDim-kernSize+1)*(inputDim-kernSize+1)
-        self.outputDim=(inputDim-kernSize+1)
+        self.numNeuronsPerKernel=(inputSize-kernSize+1)*(inputSize-kernSize+1)
+        self.outputSize=(inputSize-kernSize+1)
         self.weights = []
         self.neurons = []
-        self.output = []
+        self.outputs = []
         if weights is None or \
-            not (len(weights) == self.numKernels and len(weights[0]) == self.numWeights + 1) or \
-            not (len(weights) == (self.numWeights+1)*self.numKernels):
+            not (len(weights) == self.numKernels and len(weights[0]) == self.numWeightsPerKernel + 1) or \
+            not (len(weights) == (self.numWeightsPerKernel+1)*self.numKernels):
             for i in range(self.numKernels):
                 w = []
-                for j in range(self.numWeights + 1):
+                for j in range(self.numWeightsPerKernel + 1):
                     w.append(np.random.uniform(0.1, 0.9))
                 self.weights.append(w)
-        elif len(weights) == (self.numWeights+1)*self.numKernels:
+        elif len(weights) == (self.numWeightsPerKernel+1)*self.numKernels:
             for i in range(self.numKernels):
                 w = []
-                for j in range(self.numWeights+1):
-                    w.append(weights[i*(self.numWeights+1)+j])
+                for j in range(self.numWeightsPerKernel+1):
+                    w.append(weights[i*(self.numWeightsPerKernel+1)+j])
                 self.weights.append(w)
         else:
             for i in weights:
@@ -179,12 +181,12 @@ class ConvolutionalLayer:
         for i in range(self.numKernels):
             for j in range(self.numNeuronsPerKernel):
                 xs = []
-                x = Neuron(self.activation, self.numWeights+1, self.lr, self.weights[i])
+                x = Neuron(self.activation, self.numWeightsPerKernel+1, self.lr, self.weights[i])
                 xs.append(x)
             self.neurons.append(xs)
 
     def calculate(self, inputs):
-        self.output = []
+        self.outputs = []
         for k in range(self.numKernels):
             fea_map = []
             for neu in self.neurons[k]:
@@ -193,7 +195,7 @@ class ConvolutionalLayer:
         
     def calculatewdeltas(self, wtimesdelta):
         self.wdeltas = []
-        for k in range(self.numKernels):
+        for k in range(self.numOutputs):
             perKer=[]
             for i in range(self.numNeuronsPerKernel):
                 x = self.neurons[k][i].calcpartialderivative(wtimesdelta[k][i])
@@ -202,19 +204,19 @@ class ConvolutionalLayer:
         self.wtimesdeltas = []
         for k in range(self.numKernels):
             y = []
-            for i in range(self.inputDim):
+            for i in range(self.inputSize):
                 y.append(0)
             self.wtimesdeltas.append(y)
         for k in range(self.numKernels):
-            for drow in range(self.outputDim):
-                for dcol in range(self.outputDim):
+            for drow in range(self.outputSize):
+                for dcol in range(self.outputSize):
                     for wrow in range(self.kernSize):
                         for wcol in range(self.kernSize):
-                            self.wtimesdeltas[k][ \
-                                (dcol+wcol)*self.inputDim + (drow+wrow)
+                            self.wtimesdeltas[k][ 
+                                (dcol+wcol)*self.inputSize + (drow+wrow)
                                 ] += self.wdeltas[k][ \
-                                dcol*self.outputDim + drow][ \
-                                wcol*self.kernSize + wrow]                 
+                                dcol*self.outputSize + drow][ \
+                                wcol*self.kernSize + wrow]
         for i in self.neurons:
             i.updateweight()
         return self.wtimesdeltas
@@ -247,10 +249,18 @@ class ConvolutionalLayer:
 
 class maxPoolingLayer:
     #assume stride is the same as filter size
-    def __init__(self, kernSize, inputDim):
-        pass
-    def calculate(self):
-        pass
+    def __init__(self, kernSize, numInputs, inputSize):
+        self.kernSize=kernSize
+        self.numInputs=numInputs
+        self.inputSize=inputSize
+        self.outputSize=np.ceil(inputSize/kernSize)
+
+    def calculate(self, inputs):
+        outputs = []
+        for channel in range(self.inputSize):
+            
+            outputs.append(channel)        
+
     def calculatewdeltas(self):
         pass
 
@@ -319,6 +329,7 @@ class NeuralNetwork:
                 layer = FullyConnected(numOfNeurons, act, numins, self.lr)
                 self.layers.append(layer)
         elif layerType == 1:
+            # add numInputs, inputSize from above
             if self.numL == 0:
                 self.outputDim = self.numinps
             if weights is not None and len(weights) == kernSize:
