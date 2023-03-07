@@ -128,6 +128,7 @@ class FullyConnected:
     #calculate the output of all the neurons in the layer and return a vector with those values 
     # (go through the neurons and call the calcualte() method)      
     def calculate(self, inputs):
+        print(f"inputs{inputs}")
         self.outputs = []
         for i in self.neurons:
             self.outputs.append(i.calculate(inputs))
@@ -512,20 +513,26 @@ if __name__=="__main__":
         np.random.seed(10)
         network = NeuralNetwork(1, 5, 0, .5)
         input = [np.random.rand(5*5)]
-        weights1 = np.random.rand(3*3+1)
-        testIn = [np.random.rand(5*5)]
-        testOut = [np.random.rand(3*3)]
+        weights1 = [np.random.rand(3*3+1)]
+        weights2 = [[x,y] for x,y in zip(np.random.rand((1)*3*3),np.random.rand((1)*3*3))]
+        print(f"weights1{weights1}")
+        print(f"weights2{weights2}")
         #3x3 conv, 1 kernel (didn't say what the size of the kernel should be)
         network.addLayer(1, kernSize=3, numKernels=1, layerType=1, weights=weights1)
         #flatten layer
         network.addLayer(1, layerType=3)
+        network.addLayer(1, numOfNeurons=len(weights2), layerType=0, weights=weights2)
+        
+        #testIn = [np.random.rand(5*5)]
+        # testOut = [np.random.rand(3*3)]
+        #testOut = [[x] for x in np.random.rand(3*3)]
+
         print(network.calculate(input))
-        for i in range(10):
-            network.train(testIn,testOut)
+        #for i in range(10):
+            #network.train(testIn,testOut)
         print(network.calculate(input))
-        print(testOut)
         # #1 neuron
-        # network.addLayer(1, 1)
+        # 
         
     elif (sys.argv[1] == 'example2'):
         #Generate data and weights for "example2"
