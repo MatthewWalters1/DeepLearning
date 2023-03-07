@@ -473,8 +473,8 @@ class NeuralNetwork:
             #     self.outputDim = layer.outputSize
             #     self.layers.append(layer)
         elif layerType == 3:
-            layer = FlattenLayer(self.outputDim)
-            self.outputDim = self.outputDim**2
+            layer = FlattenLayer(self.outputSize)
+            self.outputSize = self.outputSize**2
             self.layers.append(layer)
 
     #Given an input, calculate the output (using the layers calculate() method)
@@ -583,23 +583,24 @@ if __name__=="__main__":
         l1k1,l1k2,l1b1,l1b2,l2k1,l2b,l3,l3b,x,y = parameters.generateExample2()
         #flatten x
         x = flat(x)
-        network = NeuralNetwork(7, 0, .5)
+        network = NeuralNetwork(1, 7, 0, .5)
         #flatten l1k1 and append the bias
         l1k1 = flat(l1k1)
         l1k1.append(l1b1[0])
         print(l1k1)
         l1k2 = flat(l1k2)
         l1k2.append(l1b2[0])
-        network.addLayer([9,9],1,2,2,1,2,1,[[l1k1],[l1k2]])
+        network.addLayer(1, (3*3)+(3*3), 2, 3, layerType=1, weights=[l1k1,l1k2])
         #flatten l2k1 (add bias), it has 2 channels
         l2k1 = flat(l2k1)
         l2k1.append(l2b[0])
-        network.addLayer(18, 1, 1, 3, 2, 1, 1, [[l2k1]])
+        network.addLayer(1, (3*3)+(3*3), 1, 3, layerType=1, weights=[l2k1])
         #flatten layer in between l2k1 and l3 
         # (I think flatten layer is redundant if you don't make your convolution lists 2d, even if you treat them as 2d internally)
-        network.addLayer(18,0,layerType=3)
+        network.addLayer(1, numKernels=0,layerType=3)
+        l3 = list(l3)
         l3.append(l3b)
-        network.addLayer(9, 1, weights=[l3])
+        network.addLayer(1, 9, 1, weights=[l3])
         print(network.calculate(x))
     
 
