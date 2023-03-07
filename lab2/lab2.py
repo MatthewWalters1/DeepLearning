@@ -302,7 +302,7 @@ class maxPoolingLayer:
         self.kernSize=kernSize
         self.numInputs=numInputs
         self.inputSize=inputSize
-        self.outputSize=np.ceil(inputSize/kernSize)
+        self.outputSize=int(np.ceil(inputSize/kernSize))
         self.maxInputLocations = []
         self.maxOutputLocations = []
 
@@ -310,7 +310,7 @@ class maxPoolingLayer:
         self.maxInputLocations = []
         self.maxOutputLocations = []
         self.outputs = []
-        for channel in range(self.inputSize):
+        for channel in range(self.numInputs):
             self.maxInputLocations.append([])
             self.maxOutputLocations.append([])
             output_table = []
@@ -324,7 +324,7 @@ class maxPoolingLayer:
                             if(krow==0 & kcol==0):
                                 self.maxInputLocations[channel].append(inputIndex)
                                 self.maxOutputLocations[channel].append(outputIndex)
-                                output_table[outputIndex] = inputs[channel][inputIndex]
+                                output_table.append(inputs[channel][inputIndex])
                             else:
                                 oldMax = output_table[outputIndex]
                                 newValue = inputs[channel][inputIndex]
@@ -493,7 +493,12 @@ def flat(x):
 
 if __name__=="__main__":
     if (len(sys.argv)<2):
-        print('try using the arguments example1, example2, or example3')
+        x = np.random.rand(3,3)
+        x = flat(x)
+        print(x)
+        network = NeuralNetwork(1,3,1,100)
+        network.addLayer(1, 0, 1, 2, 2)
+        print(network.calculate([x]))
 
     elif (sys.argv[1] == 'example'):
         print('making the lab1 example from class but with addLayer')
