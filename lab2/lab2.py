@@ -276,17 +276,30 @@ class ConvolutionalLayer:
         updatedWeights = []
         print(f"wtimesdelta{wtimesdelta[0]}")
         print(f"self.outputs{self.outputs[0]}")
-        print(f"self.numWeightsPerKernel{self.numWeightsPerKernel}")
+        print(f"self.numWeightsPerKernel{self.numWeightsPerKernel+1}")
         for k in range(self.numKernels):
             wsPDeriv = []
             for w in range(self.numWeightsPerKernel+1) :
                 wPDeriv = 0
                 for neur in range(self.numNeuronsPerKernel):
+                    neuron = self.neurons[k][neur]
                     print(f"285<<<<  k{k} w{w} neur{neur} ")
-                    wPDeriv += wtimesdelta[k][neur][w]*self.outputs[k][neur]
+                    if w==self.numWeightsPerKernel:
+                        wPDeriv += neuron.delta*1
+                    else:
+                        wPDeriv += neuron.delta*neuron.input[w]
                 wsPDeriv.append(wPDeriv)
             updatedWeights.append(wsPDeriv)
-        self.weights = updatedWeights 
+        # for k in range(self.numKernels):
+        #     wsPDeriv = []
+        #     for w in range(self.numWeightsPerKernel+1) :
+        #         wPDeriv = 0
+        #         for neur in range(self.numNeuronsPerKernel):
+        #             print(f"285<<<<  k{k} w{w} neur{neur} ")
+        #             wPDeriv += wtimesdelta[k][neur][w]*self.outputs[k][neur]
+        #         wsPDeriv.append(wPDeriv)
+        #     updatedWeights.append(wsPDeriv)
+        self.weights = updatedWeights
                 
             
         return self.wtimesdeltas
