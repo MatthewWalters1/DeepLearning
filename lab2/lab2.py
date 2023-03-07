@@ -316,7 +316,7 @@ class maxPoolingLayer:
 
     def calculatewdeltas(self, wtimesdeltas):
         #given wtimesdeltas, return a list filled with zeroes except for the maxInputLocations, where the wtimesdeltas will go
-        pass
+        
 
 class FlattenLayer:
     def __init__(self, inputSize):
@@ -492,7 +492,7 @@ if __name__=="__main__":
     elif (sys.argv[1] == 'example1'):
         np.random.seed(10)
         network = NeuralNetwork(1, 5, 0, .5)
-        x = [np.random.rand(5*5)]
+        x = np.random.rand(5*5)
         #3x3 conv, 1 kernel (didn't say what the size of the kernel should be)
         network.addLayer(1, kernSize=3, numKernels=1, layerType=1, weights=[x])
         print(network.calculate(x))
