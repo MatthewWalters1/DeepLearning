@@ -308,7 +308,7 @@ class maxPoolingLayer:
     def calculate(self, inputs):
         self.maxInputLocations = []
         self.maxOutputLocations = []
-        outputs = []
+        self.outputs = []
         for channel in range(self.inputSize):
             self.maxInputLocations.append([])
             self.maxOutputLocations.append([])
@@ -330,7 +330,8 @@ class maxPoolingLayer:
                                 if newValue > oldMax:
                                     self.maxInputLocations[channel][ocol*self.outputSize+orow] = inputIndex
                                 output_table[outputIndex] = newValue
-            outputs.append(channel)        
+            self.outputs.append(channel)  
+        return self.outputs 
 
     def calculatewdeltas(self, wtimesdeltas):
         #given wtimesdeltas, return a list filled with zeroes except for the maxInputLocations, where the wtimesdeltas will go
@@ -343,25 +344,34 @@ class maxPoolingLayer:
         return alldeltas    
 
 class FlattenLayer:
-    def __init__(self, inputSize):
+    def __init__(self, numInputs, inputSize):
         self.inputSize = inputSize
+        self.numInputs = numInputs
+
     #there will be no neurons here, it just resizes the output of the previous layer from 2d to 1d
-    def calculate(self, input):
-        self.output = []
-        if len(input) != inputSize**2:
+    def calculate(self, inputs):
+        self.outputs = []
+        if len(inputs) != self.inputs:
+            print("incorrect number of inputs, fully connected layers won't work right")
+        if len(inputs[0]) != self.inputSize**2:
             print("input of incorrect size, fully connected layers won't work right")
         #because we index our convolutions in 1d (even though their treated as if they're 2d), this won't really do anything, 
         # it's just a buffer so the next layer can be fully connected
-        for i in input:
-            self.output.append(j)
-        return self.output
+        for i in range(len(inputs)):
+            for j in range(len(inputs[i])):
+                self.outputs.append(inputs[i][j])
+        return self.outputs
+
     def calculatewdeltas(self, wtimesdelta):
         #here, given the wdeltas from the next layer, it gives them to the appropriate neurons in the previous one
         #but, because calculate is identical to the previous layer, you just take wdeltas and send it back a layer
-        deltaw = []
-        for i in wtimesdelta:
-            deltaw.append(i)
-        return deltaw
+        allDeltaW = []
+        for i in range(self.numInputs):
+            deltaw = []
+            for j in range(self.inputSize):  
+                deltaw.append(wtimesdelta[i*self.inputSize+j])
+            allDeltaW.append(deltaw)
+        return allDeltaW
 
 #An entire neural network 
 class NeuralNetwork:
@@ -405,11 +415,19 @@ class NeuralNetwork:
             self.layers.append(layer)
             self.numNeurons.append(0)
         elif layerType == 3:
+<<<<<<< HEAD
             layer = FlattenLayer(numInputs=curNumOutputs, inputSize=curOutputSize)
             self.outputSize = 1
             self.numOutputs = curNumOutputs*curOutputSize
             self.layers.append(layer)
             self.numNeurons.append(0)
+            
+=======
+            layer = FlattenLayer(self.outputSize, self.outputSize)
+            self.outputSize = self.outputSize**2
+            self.layers.append(layer)
+            self.numNeurons.append(0)
+>>>>>>> 46c93c6c0a30afd9cb9beacb1cd3919271c5472b
 
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,inputs):
@@ -502,13 +520,13 @@ if __name__=="__main__":
         testOut = [np.random.rand(3*3)]
         #3x3 conv, 1 kernel (didn't say what the size of the kernel should be)
         network.addLayer(1, kernSize=3, numKernels=1, layerType=1, weights=weights1)
+        #flatten layer
+        network.addLayer(1, layerType=3)
         print(network.calculate(input))
         for i in range(10):
             network.train(testIn,testOut)
         print(network.calculate(input))
-
-        # #flatten layer
-        # network.addLayer(,1,layerType=3)
+        print(testOut)
         # #1 neuron
         # network.addLayer(1, 1)
         
