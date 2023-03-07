@@ -311,7 +311,7 @@ class maxPoolingLayer:
         self.kernSize=kernSize
         self.numInputs=numInputs
         self.inputSize=inputSize
-        self.outputSize=np.ceil(inputSize/kernSize)
+        self.outputSize=int(np.ceil(inputSize/kernSize))
         self.maxInputLocations = []
         self.maxOutputLocations = []
 
@@ -319,7 +319,7 @@ class maxPoolingLayer:
         self.maxInputLocations = []
         self.maxOutputLocations = []
         self.outputs = []
-        for channel in range(self.inputSize):
+        for channel in range(self.numInputs):
             self.maxInputLocations.append([])
             self.maxOutputLocations.append([])
             output_table = []
@@ -333,7 +333,7 @@ class maxPoolingLayer:
                             if(krow==0 & kcol==0):
                                 self.maxInputLocations[channel].append(inputIndex)
                                 self.maxOutputLocations[channel].append(outputIndex)
-                                output_table[outputIndex] = inputs[channel][inputIndex]
+                                output_table.append(inputs[channel][inputIndex])
                             else:
                                 oldMax = output_table[outputIndex]
                                 newValue = inputs[channel][inputIndex]
@@ -503,7 +503,12 @@ def flat(x):
 
 if __name__=="__main__":
     if (len(sys.argv)<2):
-        print('try using the arguments example1, example2, or example3')
+        x = np.random.rand(3,3)
+        x = flat(x)
+        print(x)
+        network = NeuralNetwork(1,3,1,100)
+        network.addLayer(1, 0, 1, 2, 2)
+        print(network.calculate([x]))
 
     elif (sys.argv[1] == 'example'):
         print('making the lab1 example from class but with addLayer')
@@ -560,15 +565,15 @@ if __name__=="__main__":
         #flatten l2k1 (add bias), it has 2 channels
         l2k1 = flat(l2k1)
         l2k1.append(l2b[0])
-        network.addLayer(2, (3*3)+(3*3), 1, 3, layerType=1, weights=[l2k1])
+        network.addLayer(1, (3*3)+(3*3), 1, 3, layerType=1, weights=[l2k1])
         #flatten layer in between l2k1 and l3 
         # (I think flatten layer is redundant if you don't make your convolution lists 2d, even if you treat them as 2d internally)
         network.addLayer(1, layerType=3)
         l3 = list(l3)
         l3.append(l3b)
         #fully connected layer
-        network.addLayer(1, 9, 1, weights=[l3])
-        print(network.calculate(x))
+        network.addLayer(1, 9, weights=[l3])
+        print(network.calculate([x]))
     
 
     elif (sys.argv[1] == 'example3'):
