@@ -20,15 +20,14 @@ input = np.random.rand(5,5)
 output = np.random.rand(1)
 l1k1 = np.random.rand(3,3)
 l1b = np.random.rand(1)
-
+l3 = np.random.rand(1,9)
+l3b = np.random.rand(1)
 #Set weights to desired values 
 
 #setting weights and bias of first layer.
 l1k1=l1k1.reshape(3,3,1,1)
 
 model.layers[0].set_weights([l1k1,np.array([l1b[0]])]) #Shape of weight matrix is (w,h,input_channels,kernels)
-l3 = np.random.rand(1,9)
-l3b = np.random.rand(1)
 
 #setting weights and bias of fully connected layer.
 model.layers[2].set_weights([np.transpose(l3),l3b])
