@@ -539,15 +539,15 @@ if __name__=="__main__":
         #flatten l2k1 (add bias), it has 2 channels
         l2k1 = flat(l2k1)
         l2k1.append(l2b[0])
-        network.addLayer(2, (3*3)+(3*3), 1, 3, layerType=1, weights=[l2k1])
+        network.addLayer(1, (3*3)+(3*3), 1, 3, layerType=1, weights=[l2k1])
         #flatten layer in between l2k1 and l3 
         # (I think flatten layer is redundant if you don't make your convolution lists 2d, even if you treat them as 2d internally)
         network.addLayer(1, layerType=3)
         l3 = list(l3)
         l3.append(l3b)
         #fully connected layer
-        network.addLayer(1, 9, 1, weights=[l3])
-        print(network.calculate(x))
+        network.addLayer(1, 9, weights=[l3])
+        print(network.calculate([x]))
     
 
     elif (sys.argv[1] == 'example3'):
