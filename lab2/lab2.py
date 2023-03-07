@@ -316,6 +316,14 @@ class maxPoolingLayer:
 
     def calculatewdeltas(self, wtimesdeltas):
         #given wtimesdeltas, return a list filled with zeroes except for the maxInputLocations, where the wtimesdeltas will go
+        alldeltas = []
+        for channel in range(self.inputSize):
+            wdelta = np.zeros(self.inputSize**2)
+            for location in range(self.maxInputLocations):
+                wdelta[self.maxInputLocations[location]] = wtimesdeltas[channel][location]
+            alldeltas.append(wdelta)
+        return alldeltas
+
         
 
 class FlattenLayer:
