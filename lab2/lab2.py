@@ -405,8 +405,9 @@ class NeuralNetwork:
             self.layers.append(layer)
             self.numNeurons.append(0)
         elif layerType == 3:
-            layer = FlattenLayer(self.outputSize, self.outputSize)
-            self.outputSize = self.outputSize**2
+            layer = FlattenLayer(numInputs=curNumOutputs, inputSize=curOutputSize)
+            self.outputSize = 1
+            self.numOutputs = curNumOutputs*curOutputSize
             self.layers.append(layer)
             self.numNeurons.append(0)
 
