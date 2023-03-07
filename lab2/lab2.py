@@ -77,16 +77,19 @@ class Neuron:
         return self.deltaw
     
     #Simply update the weights using the partial derivatives and the learning rate
-    def updateweight(self):
-        newweights = []
-        for i in range(len(self.weights)):
-            if i >= self.numInputs:
-                newweights.append(self.weights[i] - self.delta*1*self.lr)
-            else:
-                newweights.append(self.weights[i] - self.delta*self.input[i]*self.lr)
-        self.weights = []
-        for i in range(len(newweights)):
-            self.weights.append(newweights[i])
+    def updateweight(self, conv=False, updatedWeights=None):
+        if conv == False:
+            newweights = []
+            for i in range(len(self.weights)):
+                if i >= self.numInputs:
+                    newweights.append(self.weights[i] - self.delta*1*self.lr)
+                else:
+                    newweights.append(self.weights[i] - self.delta*self.input[i]*self.lr)
+            self.weights = []
+            for i in range(len(newweights)):
+                self.weights.append(newweights[i])
+        else:
+            self.weights = updatedWeights.copy()
         return self.weights
 
 #A fully connected layer        
