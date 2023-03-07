@@ -81,14 +81,17 @@ class Neuron:
     def updateweight(self, conv=False, updatedWeights=None):
         if conv == False:
             newweights = []
+            #print(f"self.delta{self.delta}")
             for i in range(len(self.weights)):
                 if i >= self.numInputs:
                     newweights.append(self.weights[i] - self.delta*1*self.lr)
                 else:
                     newweights.append(self.weights[i] - self.delta*self.input[i]*self.lr)
             self.weights = []
+            #print(f"newweights{newweights}")
             for i in range(len(newweights)):
                 self.weights.append(newweights[i])
+            #print(f"self.weights{self.weights}")
         if conv == True:
             self.weights = updatedWeights.copy()
         return self.weights
@@ -144,7 +147,7 @@ class FullyConnected:
     # for each (with the correct value), sum up its own w*delta, and then update the weights (using the updateweight() method). 
     # I should return the sum of w*delta.          
     def calculatewdeltas(self, wtimesdelta):
-        print(wtimesdelta)
+        #print(wtimesdelta)
         self.wdeltas = []
         for i in range(len(self.neurons)):
             x = self.neurons[i].calcpartialderivative(wtimesdelta[i][0])
@@ -490,7 +493,7 @@ class NeuralNetwork:
                 # print(y[i])
                 ld.append(self.lossderiv(output[i][j], y[i][j]))
             allLD.append(ld)
-        print(f"ld:{ld}")
+        #print(f"ld:{ld}")
         for i in reversed(range(len(self.layers))):
            allLD = self.layers[i].calculatewdeltas(allLD)
 
@@ -525,8 +528,9 @@ if __name__=="__main__":
         print(network.calculate(x))
 
     elif (sys.argv[1] == 'example1'):
+        print("Running Example 1")
         np.random.seed(10)
-        network = NeuralNetwork(1, 5, 0, .5)
+        network = NeuralNetwork(1, 5, 0, 100)
         input = [np.random.rand(5*5)]
         weights1 = [np.random.rand(3*3+1)]
         weights2 = [[x,y] for x,y in zip(np.random.rand((1)*3*3),np.random.rand((1)*3*3))]
@@ -542,12 +546,18 @@ if __name__=="__main__":
         testOut = [[np.random.rand(1)]]
         #testOut = [[x] for x in np.random.rand(3*3)]
 
-        print(network.calculate(input))
-        for i in range(10):
+        print("BEFORE TRAINING")
+        print(f"network.layers[0].weights={network.layers[0].weights}\n")
+        print(f"network.layers[2].weights={network.layers[2].neurons[0].weights}\n")
+        print(f"network.calculate(input)={network.calculate(input)}")
+        for i in range(1):
             network.train(testIn,testOut)
-        print(network.calculate(input))
-        # #1 neuron
-        # 
+        print("POST TRAINING")
+        print(f"network.layers[0].weights={network.layers[0].weights}\n")
+        print(f"network.layers[2].weights={network.layers[2].neurons[0].weights}\n")
+        print(f"network.calculate(input)={network.calculate(input)}")
+
+         
         
     elif (sys.argv[1] == 'example2'):
         #Generate data and weights for "example2"
