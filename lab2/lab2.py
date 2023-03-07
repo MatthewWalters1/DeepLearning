@@ -128,6 +128,7 @@ class FullyConnected:
     #calculate the output of all the neurons in the layer and return a vector with those values 
     # (go through the neurons and call the calcualte() method)      
     def calculate(self, inputs):
+        print(f"inputs{inputs}")
         self.outputs = []
         for i in self.neurons:
             self.outputs.append(i.calculate(inputs))
@@ -347,11 +348,13 @@ class FlattenLayer:
     def __init__(self, numInputs, inputSize):
         self.inputSize = inputSize
         self.numInputs = numInputs
+        self.numOutputs = numInputs*inputSize*inputSize
+        self.outputSize = 1
 
     #there will be no neurons here, it just resizes the output of the previous layer from 2d to 1d
     def calculate(self, inputs):
         self.outputs = []
-        if len(inputs) != self.inputs:
+        if len(inputs) != self.numInputs:
             print("incorrect number of inputs, fully connected layers won't work right")
         if len(inputs[0]) != self.inputSize**2:
             print("input of incorrect size, fully connected layers won't work right")
@@ -359,18 +362,20 @@ class FlattenLayer:
         # it's just a buffer so the next layer can be fully connected
         for i in range(len(inputs)):
             for j in range(len(inputs[i])):
-                self.outputs.append(inputs[i][j])
+                self.outputs.append([inputs[i][j]])
         return self.outputs
 
     def calculatewdeltas(self, wtimesdelta):
         #here, given the wdeltas from the next layer, it gives them to the appropriate neurons in the previous one
         #but, because calculate is identical to the previous layer, you just take wdeltas and send it back a layer
+
         allDeltaW = []
         for i in range(self.numInputs):
             deltaw = []
-            for j in range(self.inputSize):  
-                deltaw.append(wtimesdelta[i*self.inputSize+j])
+            for j in range(self.inputSize**2):  
+                deltaw.append(wtimesdelta[i*self.inputSize+j][0])
             allDeltaW.append(deltaw)
+
         return allDeltaW
 
 #An entire neural network 
@@ -508,20 +513,26 @@ if __name__=="__main__":
         np.random.seed(10)
         network = NeuralNetwork(1, 5, 0, .5)
         input = [np.random.rand(5*5)]
-        weights1 = np.random.rand(3*3+1)
-        testIn = [np.random.rand(5*5)]
-        testOut = [np.random.rand(3*3)]
+        weights1 = [np.random.rand(3*3+1)]
+        weights2 = [[x,y] for x,y in zip(np.random.rand((1)*3*3),np.random.rand((1)*3*3))]
+        print(f"weights1{weights1}")
+        print(f"weights2{weights2}")
         #3x3 conv, 1 kernel (didn't say what the size of the kernel should be)
         network.addLayer(1, kernSize=3, numKernels=1, layerType=1, weights=weights1)
         #flatten layer
         network.addLayer(1, layerType=3)
+        network.addLayer(1, numOfNeurons=len(weights2), layerType=0, weights=weights2)
+        
+        #testIn = [np.random.rand(5*5)]
+        # testOut = [np.random.rand(3*3)]
+        #testOut = [[x] for x in np.random.rand(3*3)]
+
         print(network.calculate(input))
-        for i in range(10):
-            network.train(testIn,testOut)
+        #for i in range(10):
+            #network.train(testIn,testOut)
         print(network.calculate(input))
-        print(testOut)
         # #1 neuron
-        # network.addLayer(1, 1)
+        # 
         
     elif (sys.argv[1] == 'example2'):
         #Generate data and weights for "example2"
