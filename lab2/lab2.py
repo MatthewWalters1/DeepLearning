@@ -208,8 +208,6 @@ class ConvolutionalLayer:
         # print(f"line196(self.neurons):{self.neurons}")
         # print(f"line196(self.outputs):{self.outputs}")
 
-
-
     def calculate(self, inputs):
         self.inputs = inputs
         self.outputs = []
@@ -290,44 +288,12 @@ class ConvolutionalLayer:
                         wPDeriv += neuron.delta*neuron.input[w]
                 wsPDeriv.append(wPDeriv)
             updatedWeights.append(wsPDeriv)
-        # for k in range(self.numKernels):
-        #     wsPDeriv = []
-        #     for w in range(self.numWeightsPerKernel+1) :
-        #         wPDeriv = 0
-        #         for neur in range(self.numNeuronsPerKernel):
-        #             print(f"285<<<<  k{k} w{w} neur{neur} ")
-        #             wPDeriv += wtimesdelta[k][neur][w]*self.outputs[k][neur]
-        #         wsPDeriv.append(wPDeriv)
-        #     updatedWeights.append(wsPDeriv)
+
         for k in range(self.numKernels):
             for i in self.neurons[k]:
                 i.updateweight(conv=True, updatedWeights=updatedWeights[k])
         self.weights = updatedWeights            
         return self.wtimesdeltas
-        # self.wdeltas = []
-        # for k in range(self.numKernels):
-        #     perKer=[]
-        #     for i in range(self.numNeuronsPerKernel):
-        #         x = self.neurons[k][i].calcpartialderivative(wtimesdelta[k][i])
-        #         perKer.append(x)
-        #     self.wdeltas.append(perKer)
-        # self.wtimesdeltas = []
-        # for k in range(self.numKernels):
-        #     perKer = []
-        #     for row in range(self.outputDim):
-        #         for column in range(self.outputDim):
-        #             y = 0
-        #             for i in range(self.kernSize):
-        #                 for j in range(self.kernSize):
-        #                     y += self.wdeltas[k][column*self.outputDim+row][j*self.kernSize+i]
-        #             perKer.append(y)
-        #     y = 0
-        #     for row in range(self.kernSize):
-        #         for column in range(self.kernSize):
-        #             y += self.wdeltas[k][self.kernSize**2][column*self.kernSize+row]
-        #     perKer.append(y)
-        #     self.wtimesdeltas.append(perKer)
-        # return self.wtimesdeltas
 
 class maxPoolingLayer:
     #assume stride is the same as filter size
@@ -374,9 +340,7 @@ class maxPoolingLayer:
             for location in range(self.maxInputLocations):
                 wdelta[self.maxInputLocations[location]] = wtimesdeltas[channel][location]
             alldeltas.append(wdelta)
-        return alldeltas
-
-        
+        return alldeltas    
 
 class FlattenLayer:
     def __init__(self, inputSize):
@@ -415,34 +379,7 @@ class NeuralNetwork:
         self.lr = lr
         self.weights = []
         self.layers = []
-    #initialize with the number of layers, number of neurons in each layer (vector), input size, activation (for each layer), 
-    # the loss function, the learning rate and a 3d matrix of weights weights (or else initialize randomly)
-    # def __init__(self,numOfLayers,numOfNeurons, inputSize, activation, loss, lr, weights=None):
-    #     self.numLayers = numOfLayers
-    #     self.numNeurons = numOfNeurons.copy()
-    #     self.numInputs = inputSize
-    #     self.activation = activation.copy()
-    #     self.loss = loss
-    #     self.lr = lr
-    #     self.layers = []
-    #     isize = self.numInputs
-    #     if weights is not None and len(weights) == self.numLayers:
-    #         for i in range(self.numLayers):
-    #             x = FullyConnected(self.numNeurons[i], self.activation[i], isize, self.lr, weights[i])
-    #             isize = self.numNeurons[i]
-    #             self.layers.append(x)
-    #     else:
-    #         for i in range(self.numLayers):
-    #             x = FullyConnected(self.numNeurons[i], self.activation[i], isize, self.lr)
-    #             isize = self.numNeurons[i]
-    #             self.layers.append(x)
-    
-    #addLayer will use self.numOutputs as it's inputsize and reset self.numOutputs to be the output size of the new layer
-    # once the other layers are implemented, we need to add to this
-    # layerType = 0: FullyConnected
-    #             1: ConvolutionalLayer
-    #             2: MaxPoolingLayer
-    #             3: FlattenLayer
+
     def addLayer(self, activation, numOfNeurons=0, numKernels=0, kernSize=0, layerType=0, weights=None):
         curNumOutputs = self.numOutputs
         curOutputSize = self.outputSize
@@ -461,20 +398,17 @@ class NeuralNetwork:
             self.numOutputs = numKernels
             self.layers.append(layer)
             self.numNeurons.append(numOfNeurons)
-            # if self.numLayers == 1:
-            #     self.outputDim = int(np.sqrt(self.numInputs))
-            # if weights is not None and len(weights) == kernSize**2 * (numChannels + 1) * (numKernels):
-            #     layer = ConvolutionalLayer(numKernels, kernSize, act, self.outputDim, lr, weights)
-            #     self.outputDim = layer.outputDim
-            #     self.layers.append(layer)
-            # else:
-            #     layer = ConvolutionalLayer(numKernels, kernSize, activation, self.numInputs, self.outputDim, self.lr)
-            #     self.outputDim = layer.outputSize
-            #     self.layers.append(layer)
+        elif layerType == 2:
+            layer = maxPoolingLayer(kernSize, curNumOutputs, curOutputSize)
+            self.outputSize = layer.outputSize
+            self.numOutputs = self.numInputs
+            self.layers.append(layer)
+            self.numNeurons.append(0)
         elif layerType == 3:
-            layer = FlattenLayer(self.outputSize)
+            layer = FlattenLayer(self.outputSize, self.outputSize)
             self.outputSize = self.outputSize**2
             self.layers.append(layer)
+            self.numNeurons.append(0)
 
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,inputs):
