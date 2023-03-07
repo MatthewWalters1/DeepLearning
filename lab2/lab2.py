@@ -46,10 +46,10 @@ class Neuron:
         x = 0
         #   here, I put range(len(input)) + 1, so the bias would be included, 
         #       and when it gets to the bias, the input is always 1, hence the if statement
-        print(f"self.numInputs {self.numInputs}")
-        print(f"self.lr {self.lr}")
-        print(f"self.weights {self.weights}")
-        print(f"len {len(self.input)}")
+        #print(f"self.numInputs {self.numInputs}")
+        #print(f"self.lr {self.lr}")
+        #print(f"self.weights {self.weights}")
+        #print(f"len {len(self.input)}")
         for i in range(len(inputs) + 1):
             if i >= len(inputs):
                 x += 1*self.weights[i]
@@ -98,6 +98,9 @@ class FullyConnected:
     # the leraning rate and a 2d matrix of weights (or else initilize randomly)
     def __init__(self,numOfNeurons, activation, input_num, lr, weights=None):
         self.numNeurons = numOfNeurons
+        self.numOutputs = numOfNeurons
+        self.outputSize = 1
+        self.inputSize = 1
         self.activation = activation
         self.numInputs = input_num
         self.lr = lr
@@ -133,7 +136,7 @@ class FullyConnected:
     #given the next layer's w*delta, should run through the neurons calling calcpartialderivative() 
     # for each (with the correct value), sum up its own w*delta, and then update the weights (using the updateweight() method). 
     # I should return the sum of w*delta.          
-    def calcwdeltas(self, wtimesdelta):
+    def calculatewdeltas(self, wtimesdelta):
         self.wdeltas = []
         for i in range(len(self.neurons)):
             x = self.neurons[i].calcpartialderivative(wtimesdelta[i])
@@ -188,22 +191,38 @@ class ConvolutionalLayer:
                     w.append(j)
                 self.weights.append(w)
         for k in range(self.numKernels):
+            xs = []
             for j in range(self.numNeuronsPerKernel):
-                xs = []
                 x = Neuron(self.activation, self.numWeightsPerKernel+1, self.lr, self.weights[k])
                 xs.append(x)
             self.neurons.append(xs)
+        # print(f"line196(self.numKernels):{self.numKernels}")
+        # print(f"line196(self.kernSize):{self.kernSize}")
+        # print(f"line196(self.numInputs):{self.numInputs}")
+        # print(f"line196(self.inputSize):{self.inputSize}")
+        # print(f"line196(self.numWeightsPerKernel):{self.numWeightsPerKernel}")
+        # print(f"line196(self.numLayersearnableParameters):{self.numLayersearnableParameters}")
+        # print(f"line196(self.numNeuronsPerKernel):{self.numNeuronsPerKernel}")
+        # print(f"line196(self.outputSize):{self.outputSize}")
+        # print(f"line196(self.weights):{self.weights}")
+        # print(f"line196(self.neurons):{self.neurons}")
+        # print(f"line196(self.outputs):{self.outputs}")
+
+
 
     def calculate(self, inputs):
         self.inputs = inputs
         self.outputs = []
-        print("length of inputs = ", len(inputs))
-        print("length of inputs[0] = ", len(inputs[0]))
+        # print("length of inputs = ", len(inputs))
+        # print("length of inputs[0] = ", len(inputs[0]))
         for k in range(self.numKernels):
             fea_map = []
             for orow in range(self.outputSize):
                 for ocol in range(self.outputSize):
                     neuron = self.neurons[k][ocol*self.outputSize+orow]
+                    # print(f"len(self.neurons):{len(self.neurons)}")
+                    # print(f"len(self.neurons[0]):{len(self.neurons[0])}")
+
                     #to make this work, we need to split up the inputs among the neurons, each neuron doesn't get all of them
                     # plus, it's probably easier to divide them up here if we can, rather than change neuron.calculate
                     neuInputs = []
@@ -211,8 +230,8 @@ class ConvolutionalLayer:
                     for krow in range(self.kernSize):
                         for kcol in range(self.kernSize):
                             neuInputs.append(inputs[k][(ocol+kcol)*self.inputSize + (orow+krow)])
-                    print("length of myinputs = ", len(neuInputs))
-                    fea_map.append(neu.calculate(neuInputs))     
+                    # print("length of myinputs = ", len(neuInputs))
+                    fea_map.append(neuron.calculate(neuInputs))     
             self.outputs.append(fea_map)
         return self.outputs
         
@@ -227,20 +246,34 @@ class ConvolutionalLayer:
         self.wtimesdeltas = []
         for k in range(self.numKernels):
             y = []
-            for i in range(self.inputSize):
+            for i in range(self.inputSize**2):
                 y.append(0)
             self.wtimesdeltas.append(y)
         for k in range(self.numKernels):
-            for drow in range(self.outputSize):
-                for dcol in range(self.outputSize):
-                    for wrow in range(self.kernSize):
-                        for wcol in range(self.kernSize):
+            for dcol in range(self.outputSize):
+                for drow in range(self.outputSize):
+                    for wcol in range(self.kernSize):
+                        for wrow in range(self.kernSize):
+                            # print(f"k{k}, drow{drow}, dcol{dcol}, wrow{wrow}, wcol{wcol}, self.inputSize{self.inputSize}")
+                            # #print(f"self.wtimesdeltas--{self.wtimesdeltas}")
+                            # #print(f"self.wtimesdeltas[0]--{self.wtimesdeltas[0]}")
+                            # #print(f"self.wdeltas--{self.wdeltas}")
+                            # #print(f"self.wdeltas[0]--{self.wdeltas[0]}")
+                            # #print(self.wdeltas[k])
+                            # #print((dcol+wcol)*self.inputSize + (drow+wrow))
+                            # print(self.wdeltas[k][ \
+                            #     dcol*self.outputSize + drow][ \
+                            #     wcol*self.kernSize + wrow])
+                            # print(self.wtimesdeltas[k][ 
+                            #     (dcol+wcol)*self.inputSize + (drow+wrow)
+                            #     ])
                             self.wtimesdeltas[k][ 
                                 (dcol+wcol)*self.inputSize + (drow+wrow)
                                 ] += self.wdeltas[k][ \
                                 dcol*self.outputSize + drow][ \
                                 wcol*self.kernSize + wrow]
         updatedWeights = []
+        print(wtimesdelta)
         for k in range(self.numKernels):
             wsPDeriv = []
             for w in range(self.numWeightsPerKernel) :
@@ -429,8 +462,8 @@ class NeuralNetwork:
 
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,inputs):
-        print(f"len(inputs {len(inputs)}")
-        print(f"len(inputs {len(inputs[0])}")
+        #print(f"len(inputs {len(inputs)}")
+        #print(f"len(inputs {len(inputs[0])}")
         self.input = inputs
         output = inputs
         for i in self.layers:
@@ -465,15 +498,24 @@ class NeuralNetwork:
         return ld
     
     #Given a single input and desired output preform one step of backpropagation 
-    # (including a forward pass, getting the derivative of the loss, and then calling calcwdeltas for layers with the right values)
+    # (including a forward pass, getting the derivative of the loss, and then calling calculatewdeltas for layers with the right values)
     def train(self,x,y):
         #PSEUDOCODE
         output = self.calculate(x)
-        ld = []
-        for i in range(self.layers[self.numLayers - 1].numN):
-            ld.append(self.lossderiv(output[i], y[i]))
+        # print(f"output:{output}")
+        allLD = []
+        lastLayer = self.layers[self.numLayers - 1]
+        for i in range(lastLayer.numOutputs):
+            ld=[]
+            for j in range(lastLayer.outputSize**2):
+                # print(f"i{i},j{j}")
+                # print(output[i])
+                # print(y[i])
+                ld.append(self.lossderiv(output[i][j], y[i][j]))
+            allLD.append(ld)
+        # print(f"ld:{ld}")
         for i in reversed(range(len(self.layers))):
-           ld = self.layers[i].calcwdeltas(ld)
+           ld = self.layers[i].calculatewdeltas(ld)
 
 def flat(x):
     newl = []
@@ -503,13 +545,16 @@ if __name__=="__main__":
     elif (sys.argv[1] == 'example1'):
         np.random.seed(10)
         network = NeuralNetwork(1, 5, 0, .5)
-        x = np.random.rand(5*5)
+        input = [np.random.rand(5*5)]
+        weights1 = np.random.rand(3*3+1)
+        testIn = [np.random.rand(5*5)]
+        testOut = [np.random.rand(3*3)]
         #3x3 conv, 1 kernel (didn't say what the size of the kernel should be)
-        network.addLayer(1, kernSize=3, numKernels=1, layerType=1, weights=[x])
-        print(network.calculate(x))
+        network.addLayer(1, kernSize=3, numKernels=1, layerType=1, weights=weights1)
+        print(network.calculate(input))
         for i in range(1):
-            network.train(x,y)
-        print(network.calculate(x))
+            network.train(testIn,testOut)
+        print(network.calculate(input))
 
         # #flatten layer
         # network.addLayer(,1,layerType=3)
