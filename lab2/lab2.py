@@ -415,19 +415,12 @@ class NeuralNetwork:
             self.layers.append(layer)
             self.numNeurons.append(0)
         elif layerType == 3:
-<<<<<<< HEAD
             layer = FlattenLayer(numInputs=curNumOutputs, inputSize=curOutputSize)
             self.outputSize = 1
             self.numOutputs = curNumOutputs*curOutputSize
             self.layers.append(layer)
             self.numNeurons.append(0)
             
-=======
-            layer = FlattenLayer(self.outputSize, self.outputSize)
-            self.outputSize = self.outputSize**2
-            self.layers.append(layer)
-            self.numNeurons.append(0)
->>>>>>> 46c93c6c0a30afd9cb9beacb1cd3919271c5472b
 
     #Given an input, calculate the output (using the layers calculate() method)
     def calculate(self,inputs):
