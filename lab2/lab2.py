@@ -88,7 +88,7 @@ class Neuron:
             self.weights = []
             for i in range(len(newweights)):
                 self.weights.append(newweights[i])
-        else:
+        if conv == True:
             self.weights = updatedWeights.copy()
         return self.weights
 
@@ -236,7 +236,7 @@ class ConvolutionalLayer:
         return self.outputs
         
     def calculatewdeltas(self, wtimesdelta):
-        print(f"wtimesdelta:{wtimesdelta}")
+        #print(f"wtimesdelta:{wtimesdelta}")
         self.wdeltas = []
         for k in range(self.numOutputs):
             perKer=[]
@@ -274,16 +274,16 @@ class ConvolutionalLayer:
                                 dcol*self.outputSize + drow][ \
                                 wcol*self.kernSize + wrow]
         updatedWeights = []
-        print(f"wtimesdelta{wtimesdelta[0]}")
-        print(f"self.outputs{self.outputs[0]}")
-        print(f"self.numWeightsPerKernel{self.numWeightsPerKernel+1}")
+        #print(f"wtimesdelta{wtimesdelta[0]}")
+        #print(f"self.outputs{self.outputs[0]}")
+        #print(f"self.numWeightsPerKernel{self.numWeightsPerKernel+1}")
         for k in range(self.numKernels):
             wsPDeriv = []
             for w in range(self.numWeightsPerKernel+1) :
                 wPDeriv = 0
                 for neur in range(self.numNeuronsPerKernel):
                     neuron = self.neurons[k][neur]
-                    print(f"285<<<<  k{k} w{w} neur{neur} ")
+                    #print(f"285<<<<  k{k} w{w} neur{neur} ")
                     if w==self.numWeightsPerKernel:
                         wPDeriv += neuron.delta*1
                     else:
@@ -299,9 +299,10 @@ class ConvolutionalLayer:
         #             wPDeriv += wtimesdelta[k][neur][w]*self.outputs[k][neur]
         #         wsPDeriv.append(wPDeriv)
         #     updatedWeights.append(wsPDeriv)
-        self.weights = updatedWeights
-                
-            
+        for k in range(self.numKernels):
+            for i in self.neurons[k]:
+                i.updateweight(conv=True, updatedWeights=updatedWeights[k])
+        self.weights = updatedWeights            
         return self.wtimesdeltas
         # self.wdeltas = []
         # for k in range(self.numKernels):
@@ -326,8 +327,6 @@ class ConvolutionalLayer:
         #             y += self.wdeltas[k][self.kernSize**2][column*self.kernSize+row]
         #     perKer.append(y)
         #     self.wtimesdeltas.append(perKer)
-        # for i in self.neurons:
-        #     i.updateweight()
         # return self.wtimesdeltas
 
 class maxPoolingLayer:
@@ -569,7 +568,7 @@ if __name__=="__main__":
         #3x3 conv, 1 kernel (didn't say what the size of the kernel should be)
         network.addLayer(1, kernSize=3, numKernels=1, layerType=1, weights=weights1)
         print(network.calculate(input))
-        for i in range(1):
+        for i in range(10):
             network.train(testIn,testOut)
         print(network.calculate(input))
 
