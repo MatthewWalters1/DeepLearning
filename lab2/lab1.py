@@ -504,7 +504,11 @@ if __name__=="__main__":
     elif (sys.argv[1] == 'example1'):
         np.random.seed(10)
         network = NeuralNetwork(1, 5, 0, .5)
+<<<<<<< HEAD
         x = [np.random.rand(5*5)]
+=======
+        x = np.random.rand(5*5)
+>>>>>>> 42d69842b25de45b5894558f21327398779d62e2
         #3x3 conv, 1 kernel (didn't say what the size of the kernel should be)
         network.addLayer(1, kernSize=3, numKernels=1, layerType=1, weights=[x])
         print(network.calculate(x))
@@ -522,25 +526,26 @@ if __name__=="__main__":
         l1k1,l1k2,l1b1,l1b2,l2k1,l2b,l3,l3b,x,y = parameters.generateExample2()
         #flatten x
         x = flat(x)
-        network = NeuralNetwork(7, 0, .5)
+        network = NeuralNetwork(1, 7, 0, .5)
         #flatten l1k1 and append the bias
         l1k1 = flat(l1k1)
         l1k1.append(l1b1[0])
         print(l1k1)
         l1k2 = flat(l1k2)
         l1k2.append(l1b2[0])
-        network.addLayer([9,9],1,2,2,1,2,1,[[l1k1],[l1k2]])
+        network.addLayer(1, (3*3)+(3*3), 2, 3, 1, weights=[l1k1,l1k2])
         #flatten l2k1 (add bias), it has 2 channels
         l2k1 = flat(l2k1)
         l2k1.append(l2b[0])
-        network.addLayer(18, 1, 1, 3, 2, 1, 1, [[l2k1]])
+        #network.addLayer(18, 1, 1, 3, 2, 1, 1, [[l2k1]])
+        network.addLayer(1, 3*3, 1, 3, 1, weights=[l2k1])
         #flatten layer in between l2k1 and l3 
         # (I think flatten layer is redundant if you don't make your convolution lists 2d, even if you treat them as 2d internally)
-        network.addLayer(18,0,layerType=3)
+        #network.addLayer(18,0,layerType=3)
+        network.addLayer(1, 9, layerType=3)
         l3.append(l3b)
-        network.addLayer(9, 1, weights=[l3])
+        network.addLayer(1, 9, layerType=0, weights=l3)
         print(network.calculate(x))
-    
 
     elif (sys.argv[1] == 'example3'):
         np.random.seed(10)
@@ -548,8 +553,8 @@ if __name__=="__main__":
         x = np.random.rand(8,8)
         x = flat(x)
         x.append(np.random.rand(1))
-        network = NeuralNetwork(8, 1, .5)
-        network.addLayer([3,3], 1, 2, 2, 1, 1, 1)
-        network.addLayer([2,2], 1, numChannels=1, layerType=2)
-        network.addLayer(1, 1)
+        network = NeuralNetwork(1, 8, 1, .5)
+        network.addLayer(1, 3*3, 2, 3, 1)
+        network.addLayer(1, numKernels=1, kernSize=2, layerType=2)
+        network.addLayer(1, 2*2, layerType=3)
         
