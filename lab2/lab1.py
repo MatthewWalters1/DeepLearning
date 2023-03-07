@@ -77,17 +77,20 @@ class Neuron:
         return self.deltaw
     
     #Simply update the weights using the partial derivatives and the learning rate
-    def updateweight(self):
-        newweights = []
-        for i in range(len(self.weights)):
-            if i >= self.numInputs:
-                newweights.append(self.weights[i] - self.delta*1*self.lr)
-            else:
-                newweights.append(self.weights[i] - self.delta*self.input[i]*self.lr)
-        self.weights = []
-        for i in range(len(newweights)):
-            self.weights.append(newweights[i])
-        return self.weights
+    def updateweight(self, conv=False, updatedWeights=None):
+        if conv == False:
+            newweights = []
+            for i in range(len(self.weights)):
+                if i >= self.numInputs:
+                    newweights.append(self.weights[i] - self.delta*1*self.lr)
+                else:
+                    newweights.append(self.weights[i] - self.delta*self.input[i]*self.lr)
+            self.weights = []
+            for i in range(len(newweights)):
+                self.weights.append(newweights[i])
+            return self.weights
+        else:
+            self.weights = updatedWeights.copy()
 
 #A fully connected layer        
 class FullyConnected:
@@ -246,9 +249,12 @@ class ConvolutionalLayer:
                     wPDeriv += wtimesdelta[k][neur][w]*self.outputs[k][neur]
                 wsPDeriv.append(wPDeriv)
             updatedWeights.append(wsPDeriv)
-        self.weights = updatedWeights 
-                
-            
+
+        self.weights = updatedWeights
+        for k in range(self.numKernels):
+            for w in range(self.numWeightsPerKernel):
+                for neur in range(self.numNeuronsPerKernel):
+                    neur.updateWeights(conv=True, updatedWeights=updatedWeights)
         return self.wtimesdeltas
         # self.wdeltas = []
         # for k in range(self.numKernels):
@@ -316,7 +322,13 @@ class maxPoolingLayer:
 
     def calculatewdeltas(self, wtimesdeltas):
         #given wtimesdeltas, return a list filled with zeroes except for the maxInputLocations, where the wtimesdeltas will go
-        pass
+        alldeltas = []
+        for channel in range(self.inputSize):
+            wdelta = np.zeros(self.inputSize**2)
+            for location in range(self.maxInputLocations):
+                wdelta[self.maxInputLocations[location]] = wtimesdeltas[channel][location]
+            alldeltas.append(wdelta)
+        return alldeltas
 
 class FlattenLayer:
     def __init__(self, inputSize):
