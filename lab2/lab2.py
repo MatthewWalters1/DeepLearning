@@ -236,6 +236,7 @@ class ConvolutionalLayer:
         return self.outputs
         
     def calculatewdeltas(self, wtimesdelta):
+        print(f"wtimesdelta:{wtimesdelta}")
         self.wdeltas = []
         for k in range(self.numOutputs):
             perKer=[]
@@ -273,12 +274,15 @@ class ConvolutionalLayer:
                                 dcol*self.outputSize + drow][ \
                                 wcol*self.kernSize + wrow]
         updatedWeights = []
-        print(wtimesdelta)
+        print(f"wtimesdelta{wtimesdelta[0]}")
+        print(f"self.outputs{self.outputs[0]}")
+        print(f"self.numWeightsPerKernel{self.numWeightsPerKernel}")
         for k in range(self.numKernels):
             wsPDeriv = []
-            for w in range(self.numWeightsPerKernel) :
+            for w in range(self.numWeightsPerKernel+1) :
                 wPDeriv = 0
                 for neur in range(self.numNeuronsPerKernel):
+                    print(f"285<<<<  k{k} w{w} neur{neur} ")
                     wPDeriv += wtimesdelta[k][neur][w]*self.outputs[k][neur]
                 wsPDeriv.append(wPDeriv)
             updatedWeights.append(wsPDeriv)
@@ -515,7 +519,7 @@ class NeuralNetwork:
             allLD.append(ld)
         # print(f"ld:{ld}")
         for i in reversed(range(len(self.layers))):
-           ld = self.layers[i].calculatewdeltas(ld)
+           allLD = self.layers[i].calculatewdeltas(allLD)
 
 def flat(x):
     newl = []
