@@ -492,7 +492,7 @@ if __name__=="__main__":
     elif (sys.argv[1] == 'example1'):
         np.random.seed(10)
         network = NeuralNetwork(1, 5, 0, .5)
-        x = np.random.rand(5*5)
+        x = [np.random.rand(5*5)]
         #3x3 conv, 1 kernel (didn't say what the size of the kernel should be)
         network.addLayer(numKernels, 1, 1, 2, 1, 1, 1)
         #flatten layer
