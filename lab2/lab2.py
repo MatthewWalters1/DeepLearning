@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import parameters
 """
 Matthew Walters - Steven Koprowicz
-2/13/23
+3/6/23
 
 For this entire file there are a few constants:
 activation:
